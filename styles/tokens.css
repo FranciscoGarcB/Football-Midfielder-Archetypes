@@ -1,0 +1,71 @@
+/* tokens.css — Design tokens & CSS custom properties
+*/
+
+:root {
+  /* Typography */
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Mono', monospace;
+
+  /* Color palette */
+  /* Backgrounds */
+  --bg-page:      #0d0f14;    /* very dark navy */
+  --bg-surface:   #14171f;    /* dark card */
+  --bg-raised:    #1c2030;    /* elevated card */
+  --bg-hover:     #232840;    /* hover state */
+  --bg-alt:       #111420;    /* alternating section bg */
+
+  /* Text */
+  --text-primary:   #e8e6df;
+  --text-secondary: #9a9890;
+  --text-muted:     #5a5855;
+  --text-accent:    #f0c060;  /* gold / Kroos accent */
+
+  /* League colors */
+  --league-premier:    #3b82f6;   /* blue */
+  --league-laliga:     #e53e3e;   /* red */
+  --league-seriea:     #0ea5e9;   /* sky */
+  --league-bundesliga: #f59e0b;   /* amber */
+  --league-ligue1:     #8b5cf6;   /* violet */
+
+  /* Cluster / archetype colors */
+  --cluster-1: #f0c060;   /* Regista / Controlador — gold */
+  --cluster-2: #4ade80;   /* Box-to-box — green */
+  --cluster-3: #f87171;   /* Destructor — red */
+  --cluster-4: #60a5fa;   /* Creador ofensivo — blue */
+  --cluster-5: #c084fc;   /* Pivot — purple */
+
+  /* Kroos highlight */
+  --kroos-color:    #f0c060;
+  --kroos-contrast: #0d0f14;
+
+  /* Borders */
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-strong:  rgba(255, 255, 255, 0.25);
+
+  /* Spacing */
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  40px;
+  --space-2xl: 80px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-med:  300ms ease;
+  --transition-slow: 500ms ease;
+
+  /* Chart config (read by JS via getComputedStyle) */
+  --chart-axis-color:   #3a3d4a;
+  --chart-grid-color:   #1e2130;
+  --chart-text-color:   #9a9890;
+  --chart-tooltip-bg:   #1c2030;
+}

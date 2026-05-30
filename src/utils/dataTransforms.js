@@ -1,0 +1,141 @@
+// Pure data-shaping helpers consumed by chart modules.
+// No D3 rendering here.
+
+const DataTransforms = (() => {
+
+  const FEATURE_GROUPS = {
+    passing: ["prog_passes", "key_passes", "xA", "pass_acc"],
+    defense: ["tackles", "interceptions", "pressures"],
+    attack:  ["goals", "assists", "xG", "shots"],
+  };
+
+  const RADAR_AXES = [
+    { key: "prog_passes",   label: "Progressive passes" },
+    { key: "key_passes",    label: "Key passes" },
+    { key: "xA",            label: "xA" },
+    { key: "tackles",       label: "Tackles" },
+    { key: "interceptions", label: "Interceptions" },
+    { key: "xG",            label: "xG" },
+  ];
+
+  const LEAGUE_COLORS = {
+    "Premier League": "#3b82f6",
+    "La Liga":        "#e53e3e",
+    "Serie A":        "#0ea5e9",
+    "Bundesliga":     "#f59e0b",
+    "Ligue 1":        "#8b5cf6",
+  };
+
+  const CLUSTER_NAMES  = { 0: "Regista", 1: "Box-to-box", 2: "Destroyer", 3: "Creative MF", 4: "Pivot" };
+  const CLUSTER_COLORS = { 0: "#f0c060", 1: "#4ade80", 2: "#f87171", 3: "#60a5fa", 4: "#c084fc" };
+
+  function applyFilters(data, filters) {
+    const f = filters || AppState.get("filters");
+    return data.filter(d => {
+      if (f.league !== "all" && d.league !== f.league) return false;
+      if (f.season !== "all" && d.season !== f.season) return false;
+      if (d.minutes < f.minMinutes) return false;
+      return true;
+    });
+  }
+
+  function leagueProfiles(data, topPct = 0.1) {
+    const byLeague = d3.group(data, d => d.league);
+    const result = [];
+    byLeague.forEach((players, league) => {
+      const minMin = d3.quantile(players.map(p => p.minutes).sort(d3.ascending), 1 - topPct) || 0;
+      const top = players.filter(p => p.minutes >= minMin);
+      const profile = { league };
+      RADAR_AXES.forEach(ax => { profile[ax.key] = d3.mean(top, d => d[ax.key]) ?? 0; });
+      result.push(profile);
+    });
+    return result;
+  }
+
+  function normalizeProfiles(profiles) {
+    const axes = RADAR_AXES.map(a => a.key);
+    const extents = {};
+    axes.forEach(k => { extents[k] = d3.extent(profiles, d => d[k]); });
+    return profiles.map(p => {
+      const norm = { league: p.league };
+      axes.forEach(k => {
+        const [lo, hi] = extents[k];
+        norm[k] = (hi === lo) ? 0 : (p[k] - lo) / (hi - lo);
+      });
+      return norm;
+    });
+  }
+
+  function normalizePlayerProfile(player, referenceRows) {
+    const axes = RADAR_AXES.map(a => a.key);
+    const extents = {};
+    axes.forEach(k => { extents[k] = d3.extent(referenceRows, d => d[k]); });
+    const norm = { label: player.name };
+    axes.forEach(k => {
+      const [lo, hi] = extents[k];
+      norm[k] = (hi === lo) ? 0 : Math.min(1, Math.max(0, (player[k] - lo) / (hi - lo)));
+    });
+    return norm;
+  }
+
+  function kroosRows(data) {
+    return data
+      .filter(d => d.name === "Toni Kroos")
+      .sort((a, b) => a.season.localeCompare(b.season));
+  }
+
+  function successorRanking(data, weights, topN = 10, leagueFilter = "all") {
+    const kroos = kroosRows(data);
+    if (!kroos.length) return [];
+
+    const allKeys = [...FEATURE_GROUPS.passing, ...FEATURE_GROUPS.defense, ...FEATURE_GROUPS.attack];
+    const centroid = {};
+    allKeys.forEach(k => { centroid[k] = d3.mean(kroos, d => d[k]) ?? 0; });
+
+    const latest = latestSeasonPerPlayer(data).filter(d => d.name !== "Toni Kroos");
+    let candidates = latest.filter(d => d.minutes >= 900);
+    if (leagueFilter !== "all") candidates = candidates.filter(d => d.league === leagueFilter);
+
+    const wTotal = (weights.passing + weights.defense + weights.attack) || 1;
+
+    return candidates
+      .map(d => {
+        const dp = euclidean(d, centroid, FEATURE_GROUPS.passing);
+        const dd = euclidean(d, centroid, FEATURE_GROUPS.defense);
+        const da = euclidean(d, centroid, FEATURE_GROUPS.attack);
+        const dist = (weights.passing * dp + weights.defense * dd + weights.attack * da) / wTotal;
+        return { ...d, similarityDist: dist };
+      })
+      .sort((a, b) => a.similarityDist - b.similarityDist)
+      .slice(0, topN);
+  }
+
+  function euclidean(a, b, keys) {
+    return Math.sqrt(d3.sum(keys, k => Math.pow((a[k] || 0) - (b[k] || 0), 2)));
+  }
+
+  function latestSeasonPerPlayer(data) {
+    const map = new Map();
+    data.forEach(d => {
+      const prev = map.get(d.name);
+      if (!prev || d.season > prev.season) map.set(d.name, d);
+    });
+    return [...map.values()];
+  }
+
+  function centroid(rows, keys) {
+    const c = {};
+    keys.forEach(k => { c[k] = d3.mean(rows, d => d[k]) ?? 0; });
+    return c;
+  }
+
+  return {
+    FEATURE_GROUPS, RADAR_AXES, LEAGUE_COLORS,
+    CLUSTER_NAMES, CLUSTER_COLORS,
+    applyFilters, leagueProfiles, normalizeProfiles,
+    normalizePlayerProfile, kroosRows,
+    successorRanking, latestSeasonPerPlayer, centroid, euclidean,
+  };
+})();
+
+window.DataTransforms = DataTransforms;
