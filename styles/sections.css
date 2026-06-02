@@ -1,86 +1,65 @@
-/* sections.css — Section-specific overrides & decoration
-*/
+/* sections.css — Section accent overrides and league toggle color states */
 
-/* Hero decorative rings */
-.hero-bg-element::before,
-.hero-bg-element::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1px solid var(--border-subtle);
-  transform: scale(1.35);
-}
+/* Per-section accent tints on the section number badge.
+   Each section has a distinct but harmonious hue derived from the same
+   warm palette, avoiding the default terracotta accent for variety. */
 
-.hero-bg-element::after {
-  transform: scale(1.7);
-}
-
-/* Section 01: accent color is blue (trophy timeline) */
 #s01 .section-num {
-  color: #60a5fa;
-  background: rgba(96, 165, 250, 0.08);
-  border-color: rgba(96, 165, 250, 0.2);
+  color: var(--kroos-color);
+  background: var(--kroos-subtle);
+  border-color: var(--kroos-border);
 }
 
-/* Section 02: accent = purple (leagues) */
 #s02 .section-num {
-  color: #c084fc;
-  background: rgba(192, 132, 252, 0.08);
-  border-color: rgba(192, 132, 252, 0.2);
-}
-
-/* Section 03: accent = teal (archetypes map) */
-#s03 .section-num {
-  color: #34d399;
-  background: rgba(52, 211, 153, 0.08);
-  border-color: rgba(52, 211, 153, 0.2);
-}
-
-/* Section 04: accent = gold (Kroos) */
-#s04 .section-num {
-  color: var(--text-accent);
-  background: rgba(240, 192, 96, 0.08);
-  border-color: rgba(240, 192, 96, 0.2);
-}
-
-#s04 .section-title em {
-  color: var(--text-accent);
-}
-
-/* Section 05: accent = green (successor) */
-#s05 .section-num {
-  color: #4ade80;
-  background: rgba(74, 222, 128, 0.08);
-  border-color: rgba(74, 222, 128, 0.2);
-}
-
-/* League colors on toggle buttons */
-.league-toggle-btn[data-league="Premier League"] {
-  color: var(--league-premier);
-  border-color: var(--league-premier);
-}
-.league-toggle-btn[data-league="La Liga"] {
-  color: var(--league-laliga);
-  border-color: var(--league-laliga);
-}
-.league-toggle-btn[data-league="Serie A"] {
-  color: var(--league-seriea);
-  border-color: var(--league-seriea);
-}
-.league-toggle-btn[data-league="Bundesliga"] {
-  color: var(--league-bundesliga);
-  border-color: var(--league-bundesliga);
-}
-.league-toggle-btn[data-league="Ligue 1"] {
   color: var(--league-ligue1);
-  border-color: var(--league-ligue1);
+  background: rgba(123, 94, 167, 0.10);
+  border-color: rgba(123, 94, 167, 0.24);
 }
 
-.league-toggle-btn.active {
-  color: var(--bg-page);
+[data-theme="light"] #s02 .section-num {
+  color: var(--league-ligue1);
+  background: rgba(94, 64, 144, 0.08);
+  border-color: rgba(94, 64, 144, 0.20);
 }
 
+#s03 .section-num {
+  color: var(--league-seriea);
+  background: rgba(58, 140, 126, 0.10);
+  border-color: rgba(58, 140, 126, 0.24);
+}
+
+[data-theme="light"] #s03 .section-num {
+  color: var(--league-seriea);
+  background: rgba(36, 112, 102, 0.08);
+  border-color: rgba(36, 112, 102, 0.20);
+}
+
+#s04 .section-num {
+  color: var(--kroos-color);
+  background: var(--kroos-subtle);
+  border-color: var(--kroos-border);
+}
+
+#s05 .section-num {
+  color: var(--league-premier);
+  background: rgba(74, 127, 181, 0.10);
+  border-color: rgba(74, 127, 181, 0.24);
+}
+
+[data-theme="light"] #s05 .section-num {
+  color: var(--league-premier);
+  background: rgba(45, 94, 148, 0.08);
+  border-color: rgba(45, 94, 148, 0.20);
+}
+
+/* League toggle button colors — active = colored background */
+.league-toggle-btn[data-league="Premier League"]         { color: var(--league-premier);    border-color: var(--league-premier); }
+.league-toggle-btn[data-league="La Liga"]                { color: var(--league-laliga);     border-color: var(--league-laliga); }
+.league-toggle-btn[data-league="Serie A"]                { color: var(--league-seriea);     border-color: var(--league-seriea); }
+.league-toggle-btn[data-league="Bundesliga"]             { color: var(--league-bundesliga); border-color: var(--league-bundesliga); }
+.league-toggle-btn[data-league="Ligue 1"]                { color: var(--league-ligue1);     border-color: var(--league-ligue1); }
+
+.league-toggle-btn.active                                { color: var(--bg-page); }
 .league-toggle-btn[data-league="Premier League"].active  { background: var(--league-premier); }
 .league-toggle-btn[data-league="La Liga"].active         { background: var(--league-laliga); }
 .league-toggle-btn[data-league="Serie A"].active         { background: var(--league-seriea); }

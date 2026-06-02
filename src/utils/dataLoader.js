@@ -51,17 +51,14 @@ const DataLoader = (() => {
 
       prog_passes:  +d.progressive_passes || 0,
       key_passes:   +d.key_passes          || 0,
-      xA:           +d.xa                  || 0,
       pass_acc:     +d.pass_completion_pct || 0,
 
       tackles:       +d.tackles        || 0,
       interceptions: +d.interceptions  || 0,
-      pressures:     +d.pressures      || 0,
 
-      goals:   +d.goals   || 0,
-      assists: +d.assists  || 0,
-      xG:      +d.xg       || 0,
-      shots:   +d.shots    || 0,
+      goals_per90:   +d.goals_per90    || 0,
+      assists_per90: +d.assists_per90  || 0,
+      shots:         +d.shots          || 0,
 
       cluster: +d.cluster,
       pc1:     +d.pc1,

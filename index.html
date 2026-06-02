@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,7 +7,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,900;1,9..144,700;1,9..144,900&family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 
@@ -19,12 +19,11 @@
 </head>
 <body>
 
-  <div class="d3-tooltip" id="d3-tooltip"></div>
-
   <header class="global-header" id="global-header">
     <div class="header-brand">
       <span class="brand-title">The Kroos Effect</span>
     </div>
+
     <nav class="section-nav" id="section-nav">
       <a href="#s01" class="nav-link active" data-section="s01">01 Context</a>
       <a href="#s02" class="nav-link" data-section="s02">02 Leagues</a>
@@ -32,11 +31,12 @@
       <a href="#s04" class="nav-link" data-section="s04">04 Kroos</a>
       <a href="#s05" class="nav-link" data-section="s05">05 Successor</a>
     </nav>
+
     <div class="global-filters" id="global-filters">
       <div class="filter-group">
         <label class="filter-label" for="filter-league">League</label>
         <select class="filter-select" id="filter-league">
-          <option value="all">All leagues</option>
+          <option value="all">All</option>
           <option value="Premier League">Premier League</option>
           <option value="La Liga">La Liga</option>
           <option value="Serie A">Serie A</option>
@@ -56,31 +56,36 @@
                value="900" min="0" max="3400" step="100" />
       </div>
     </div>
+
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">Light mode</button>
   </header>
+
 
   <section class="hero" id="hero">
     <div class="hero-content">
-      <p class="hero-eyebrow">Top 5 European Leagues · 2017–2025</p>
-      <h1 class="hero-title">The Kroos<br /><em>Effect</em></h1>
+      <p class="hero-eyebrow">Top 5 European Leagues &middot; 2017&ndash;2025</p>
+      <h1 class="hero-title">The Kroos<em>Effect</em></h1>
       <p class="hero-sub">
         In June 2024, Toni Kroos retired. Real Madrid went on to win no major
-        title in the two subsequent seasons. Coincidence or irreplaceable loss?
-        A visual analysis of midfielder archetypes across the top 5 European leagues.
+        trophy in either of the two following seasons &mdash; an outcome almost
+        without precedent in the club&rsquo;s modern history. Was it coincidence,
+        or the loss of something irreplaceable?
       </p>
       <div class="hero-questions">
         <div class="hero-q">
           <span class="hero-q-num">Q1</span>
-          How do the top midfielder archetypes differ across the five leagues?
+          How do the top midfielder archetypes differ across the five major European leagues?
         </div>
         <div class="hero-q">
           <span class="hero-q-num">Q2</span>
           Which active players share a statistical profile closest to Toni Kroos?
         </div>
       </div>
-      <a href="#s01" class="hero-cta">Explore</a>
+      <a href="#s01" class="hero-cta">Explore the data</a>
     </div>
     <div class="hero-bg-element" aria-hidden="true"></div>
   </section>
+
 
   <section class="viz-section" id="s01">
     <div class="section-header">
@@ -88,9 +93,10 @@
       <div>
         <h2 class="section-title">The void Kroos left behind</h2>
         <p class="section-desc">
-          Real Madrid won the Champions League in 2022 and 2024. Then Kroos retired.
-          The following two seasons, the club lifted no major trophy.
-          Explore how his individual statistics evolved and when he disappeared from the map.
+          Real Madrid won the Champions League in 2022 and 2024.
+          Then Kroos retired. In the two seasons that followed,
+          the club collected no major silverware. Explore his statistical
+          output across every season and how it tracked with the team&rsquo;s results.
         </p>
       </div>
     </div>
@@ -99,15 +105,15 @@
 
       <div class="chart-card" id="chart-01a">
         <div class="chart-card__header">
-          <h3 class="chart-card__title">Real Madrid trophies (2017–2025)</h3>
+          <h3 class="chart-card__title">Real Madrid trophies by season (2017&ndash;2025)</h3>
           <div class="chart-card__controls">
-            <span class="chip chip--info">Hover for season detail</span>
+            <span class="chip chip--info">Hover for detail</span>
           </div>
         </div>
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="timeline-trophies">
-            <span class="placeholder-label">Timeline of trophies</span>
-            <span class="placeholder-type">Dot-plot · D3 · one row per competition · annotation at 2024 retirement</span>
+            <span class="placeholder-label">Trophy timeline</span>
+            <span class="placeholder-type">Dot-plot &middot; D3 &middot; rows = competition, columns = season &middot; Kroos era shaded</span>
           </div>
         </div>
       </div>
@@ -117,16 +123,18 @@
           <h3 class="chart-card__title">Kroos stats by season</h3>
           <div class="chart-card__controls">
             <select class="control-select" id="ctrl-01b-metric">
-              <option value="prog_passes">Progressive passes</option>
-              <option value="key_passes">Key passes</option>
-              <option value="xA">Expected assists (xA)</option>
+              <option value="progressive_passes">Progressive passes / 90</option>
+              <option value="key_passes">Key passes / 90</option>
+              <option value="tackles">Tackles / 90</option>
+              <option value="interceptions">Interceptions / 90</option>
+              <option value="pass_completion_pct">Pass completion %</option>
             </select>
           </div>
         </div>
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="kroos-season-line">
             <span class="placeholder-label">Kroos season trend</span>
-            <span class="placeholder-type">Area + line · D3 · retirement marker at 2023-24</span>
+            <span class="placeholder-type">Area + line &middot; D3 &middot; annotation at retirement season</span>
           </div>
         </div>
       </div>
@@ -134,14 +142,16 @@
     </div>
   </section>
 
+
   <section class="viz-section viz-section--alt" id="s02">
     <div class="section-header">
       <span class="section-num">02</span>
       <div>
-        <h2 class="section-title">Archetypes by league</h2>
+        <h2 class="section-title">Archetypes across leagues</h2>
         <p class="section-desc">
           Does the Premier League demand the same midfielder profile as the Bundesliga?
-          Compare the statistical fingerprint of the top 10% of midfielders per league.
+          Compare the average statistical shape of the top 10% of midfielders
+          in each of the five major leagues.
         </p>
       </div>
     </div>
@@ -150,41 +160,41 @@
 
       <div class="chart-card" id="chart-02a">
         <div class="chart-card__header">
-          <h3 class="chart-card__title">Average profile per league</h3>
+          <h3 class="chart-card__title">Average profile by league</h3>
           <div class="chart-card__controls">
             <div class="league-toggles" id="league-toggles"></div>
           </div>
         </div>
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="radar-leagues">
-            <span class="placeholder-label">Overlapping radar chart</span>
-            <span class="placeholder-type">D3 · one polygon per league · toggle visibility · axes = feature categories</span>
+            <span class="placeholder-label">League radar chart</span>
+            <span class="placeholder-type">Overlapping radar &middot; D3 &middot; one polygon per active league &middot; toggle via buttons</span>
           </div>
         </div>
       </div>
 
       <div class="chart-card" id="chart-02b">
         <div class="chart-card__header">
-          <h3 class="chart-card__title">Per-metric comparison</h3>
+          <h3 class="chart-card__title">Metric comparison</h3>
           <div class="chart-card__controls">
             <select class="control-select" id="ctrl-02b-metric">
-              <option value="prog_passes">Progressive passes</option>
-              <option value="key_passes">Key passes</option>
-              <option value="xA">xA</option>
-              <option value="tackles">Tackles</option>
-              <option value="interceptions">Interceptions</option>
-              <option value="xG">xG</option>
+              <option value="prog_passes">Progressive passes / 90</option>
+              <option value="key_passes">Key passes / 90</option>
+              <option value="pass_acc">Pass completion %</option>
+              <option value="tackles">Tackles / 90</option>
+              <option value="interceptions">Interceptions / 90</option>
+              <option value="goals_per90">Goals / 90</option>
             </select>
             <select class="control-select" id="ctrl-02b-sort">
-              <option value="value">Sort by value</option>
-              <option value="alpha">Sort A–Z</option>
+              <option value="value">Sort: value</option>
+              <option value="alpha">Sort: A&ndash;Z</option>
             </select>
           </div>
         </div>
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="bar-leagues">
-            <span class="placeholder-label">Grouped bar chart</span>
-            <span class="placeholder-type">D3 · one bar per league · metric selectable · animated on change</span>
+            <span class="placeholder-label">Horizontal bar chart</span>
+            <span class="placeholder-type">D3 &middot; grouped by league &middot; animated transition on metric change</span>
           </div>
         </div>
       </div>
@@ -192,21 +202,23 @@
     </div>
   </section>
 
+
   <section class="viz-section" id="s03">
     <div class="section-header">
       <span class="section-num">03</span>
       <div>
         <h2 class="section-title">The archetype map</h2>
         <p class="section-desc">
-          PCA projection of all midfielder seasons. Each dot is one player in one season.
-          Colors represent clusters. Click any dot to inspect that player's profile.
+          PCA applied to midfielder statistics across all five leagues.
+          Each point is one player-season. Colors represent clusters identified
+          by k-means. Click any player to see their full profile and nearest neighbors.
         </p>
       </div>
     </div>
 
     <div class="chart-card chart-card--full" id="chart-03a">
       <div class="chart-card__header">
-        <h3 class="chart-card__title">PCA space — all midfielders</h3>
+        <h3 class="chart-card__title">Midfielder PCA space</h3>
         <div class="chart-card__controls">
           <select class="control-select" id="ctrl-03a-season">
             <option value="all">All seasons</option>
@@ -220,29 +232,30 @@
           <button class="control-btn" id="ctrl-03a-reset">Reset zoom</button>
         </div>
       </div>
+
       <div class="chart-card__body chart-card__body--split">
 
         <div class="chart-primary" id="pca-scatter-container">
           <div class="chart-placeholder" data-chart="pca-scatter">
             <span class="placeholder-label">PCA scatter plot</span>
-            <span class="placeholder-type">D3 · zoom + pan · click to select · color by cluster or league · Kroos highlighted</span>
+            <span class="placeholder-type">D3 &middot; zoom + pan &middot; click to select &middot; color by cluster or league &middot; Kroos highlighted</span>
           </div>
         </div>
 
         <div class="chart-sidebar" id="player-detail-panel">
           <div class="player-card" id="player-card">
             <div class="player-card__empty">
-              Click any dot to inspect a player
+              &larr; Click a player<br />to see their profile
             </div>
             <div class="player-card__content" id="player-card-content" hidden>
               <div class="player-card__name" id="pc-name"></div>
               <div class="player-card__meta" id="pc-meta"></div>
               <div class="chart-placeholder chart-placeholder--sm" data-chart="player-radar-small" id="pc-radar">
                 <span class="placeholder-label">Player radar</span>
-                <span class="placeholder-type">D3 · player vs league average</span>
+                <span class="placeholder-type">D3 &middot; vs league average</span>
               </div>
               <div class="player-card__similar" id="pc-similar">
-                <h4>Similar players</h4>
+                <h4>Most similar players</h4>
                 <ul class="similar-list" id="pc-similar-list"></ul>
               </div>
             </div>
@@ -250,10 +263,11 @@
         </div>
 
       </div>
+
       <div class="cluster-legend" id="cluster-legend"></div>
     </div>
-
   </section>
+
 
   <section class="viz-section viz-section--alt" id="s04">
     <div class="section-header">
@@ -262,7 +276,8 @@
         <h2 class="section-title">Anatomy of Toni Kroos</h2>
         <p class="section-desc">
           What made Kroos singular? His full profile: how it evolved season by season,
-          where he lived in the archetype space, and in which metrics he was an absolute outlier.
+          where he sat in the archetype space, and in which metrics he was a clear
+          outlier relative to the rest of La Liga&rsquo;s top midfielders.
         </p>
       </div>
     </div>
@@ -271,7 +286,7 @@
 
       <div class="chart-card" id="chart-04a">
         <div class="chart-card__header">
-          <h3 class="chart-card__title">Kroos — season by season evolution</h3>
+          <h3 class="chart-card__title">Kroos &mdash; season by season evolution</h3>
           <div class="chart-card__controls">
             <div class="metric-checkboxes" id="ctrl-04a-metrics"></div>
           </div>
@@ -279,7 +294,7 @@
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="kroos-multiline">
             <span class="placeholder-label">Multi-line chart</span>
-            <span class="placeholder-type">D3 · multiple metrics · normalized to 0-1 · retirement annotation</span>
+            <span class="placeholder-type">D3 &middot; normalized metrics &middot; animated draw-in &middot; retirement annotation</span>
           </div>
         </div>
       </div>
@@ -289,14 +304,14 @@
           <h3 class="chart-card__title">Kroos vs. La Liga average</h3>
           <div class="chart-card__controls">
             <select class="control-select" id="ctrl-04b-season">
-              <option value="2022-23">2022/23 (last full season)</option>
+              <option value="2022-23">2022/23 (final season)</option>
             </select>
           </div>
         </div>
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="kroos-vs-league-radar">
             <span class="placeholder-label">Kroos vs 90th percentile radar</span>
-            <span class="placeholder-type">D3 · two overlapping polygons · Kroos (gold) vs La Liga top 10% (gray)</span>
+            <span class="placeholder-type">D3 &middot; two overlapping polygons &middot; Kroos (amber) vs La Liga top 10% (gray)</span>
           </div>
         </div>
       </div>
@@ -305,7 +320,7 @@
 
     <div class="chart-card chart-card--full" id="chart-04c">
       <div class="chart-card__header">
-        <h3 class="chart-card__title">Kroos's trajectory in the archetype space (2017–2023)</h3>
+        <h3 class="chart-card__title">Kroos&rsquo;s trajectory in the archetype space (2017&ndash;2023)</h3>
         <div class="chart-card__controls">
           <button class="control-btn control-btn--play" id="ctrl-04c-play">Play</button>
           <button class="control-btn" id="ctrl-04c-reset">Reset</button>
@@ -317,12 +332,13 @@
       <div class="chart-card__body">
         <div class="chart-placeholder" data-chart="kroos-pca-trajectory">
           <span class="placeholder-label">Animated PCA trajectory</span>
-          <span class="placeholder-type">D3 · background = all MF in gray · gold path + dot traces Kroos year by year · play/pause button</span>
+          <span class="placeholder-type">D3 &middot; background = all MF in gray &middot; amber path + dot traces Kroos year by year &middot; play/pause button</span>
         </div>
       </div>
     </div>
 
   </section>
+
 
   <section class="viz-section" id="s05">
     <div class="section-header">
@@ -330,9 +346,10 @@
       <div>
         <h2 class="section-title">Who can replace Kroos?</h2>
         <p class="section-desc">
-          Using the weighted distance in PCA space from the Kroos centroid (averaged 2019–2023),
-          we rank active midfielders by statistical similarity.
-          Adjust the category weights to change what "similar" means.
+          Using the weighted distance in PCA space from the Kroos centroid
+          (averaged across his 2019&ndash;2023 prime seasons), we rank the
+          active midfielders statistically closest to his profile.
+          Adjust the weight of each dimension to explore what &ldquo;similar&rdquo; means.
         </p>
       </div>
     </div>
@@ -341,7 +358,7 @@
       <h4 class="weight-panel__title">Adjust the importance of each dimension</h4>
       <div class="weight-sliders" id="weight-sliders">
         <div class="weight-slider-group">
-          <label class="weight-label" for="w-passing">Passing and creativity</label>
+          <label class="weight-label" for="w-passing">Passing &amp; creativity</label>
           <input type="range" class="weight-slider" id="w-passing"
                  min="0" max="10" step="1" value="5" />
           <span class="weight-value" id="w-passing-val">5</span>
@@ -380,7 +397,7 @@
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="successor-ranking">
             <span class="placeholder-label">Lollipop ranking chart</span>
-            <span class="placeholder-type">D3 · top 10 by weighted PCA distance · reorders on weight slider change · click row to compare</span>
+            <span class="placeholder-type">D3 &middot; top 10 by distance to Kroos centroid &middot; reorders with weight sliders &middot; click to compare</span>
           </div>
         </div>
       </div>
@@ -389,13 +406,13 @@
         <div class="chart-card__header">
           <h3 class="chart-card__title">Profile comparison</h3>
           <div class="chart-card__controls">
-            <span class="chip chip--muted" id="ctrl-05b-hint">Select a player from the ranking</span>
+            <span class="chip chip--muted" id="ctrl-05b-hint">Select a player to compare</span>
           </div>
         </div>
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="comparison-radar">
             <span class="placeholder-label">Comparison radar</span>
-            <span class="placeholder-type">D3 · Kroos (gold, fixed) overlaid with selected candidate (blue)</span>
+            <span class="placeholder-type">D3 &middot; Kroos (amber, fixed) overlaid with selected candidate (blue)</span>
           </div>
         </div>
       </div>
@@ -403,29 +420,33 @@
     </div>
   </section>
 
+
   <footer class="site-footer" id="conclusions">
     <div class="footer-inner">
       <h2 class="footer-title">Findings</h2>
       <div class="conclusions-grid" id="conclusions-grid">
         <div class="conclusion-card conclusion-card--placeholder">
-          Conclusions will populate here once data is loaded.
+          Findings will appear here once data is loaded.
         </div>
       </div>
       <p class="footer-credit">
-        Data: FBref via Kaggle · Top 5 European Leagues 2017–2025 ·
-        Visualization: D3.js · Analysis: Python (pandas, scikit-learn)
+        Data: FBref via Kaggle &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
+        Visualization: D3.js &middot; Analysis: Python (pandas, scikit-learn)
       </p>
     </div>
   </footer>
 
+
   <script src="src/utils/state.js"></script>
   <script src="src/utils/dataLoader.js"></script>
   <script src="src/utils/dataTransforms.js"></script>
+
   <script src="src/components/filters.js"></script>
   <script src="src/components/playerCard.js"></script>
   <script src="src/components/clusterLegend.js"></script>
   <script src="src/components/leagueToggles.js"></script>
   <script src="src/components/scrollNav.js"></script>
+
   <script src="src/charts/timelineTrophies.js"></script>
   <script src="src/charts/kroosSeason.js"></script>
   <script src="src/charts/radarLeagues.js"></script>
@@ -436,7 +457,33 @@
   <script src="src/charts/kroosTrajectory.js"></script>
   <script src="src/charts/successorRanking.js"></script>
   <script src="src/charts/comparisonRadar.js"></script>
+
   <script src="src/app.js"></script>
+
+  <script>
+    // Theme toggle — persists to localStorage
+    (function () {
+      const root   = document.documentElement;
+      const btn    = document.getElementById("theme-toggle");
+      const stored = localStorage.getItem("theme");
+      if (stored) root.setAttribute("data-theme", stored);
+
+      function updateLabel() {
+        btn.textContent = root.getAttribute("data-theme") === "dark"
+          ? "Light mode"
+          : "Dark mode";
+      }
+
+      updateLabel();
+
+      btn.addEventListener("click", () => {
+        const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+        updateLabel();
+      });
+    })();
+  </script>
 
 </body>
 </html>

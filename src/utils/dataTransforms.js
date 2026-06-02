@@ -4,18 +4,19 @@
 const DataTransforms = (() => {
 
   const FEATURE_GROUPS = {
-    passing: ["prog_passes", "key_passes", "xA", "pass_acc"],
-    defense: ["tackles", "interceptions", "pressures"],
-    attack:  ["goals", "assists", "xG", "shots"],
+    passing: ["prog_passes", "key_passes", "pass_acc"],
+    defense: ["tackles", "interceptions"],
+    attack:  ["goals_per90", "assists_per90", "shots"],
   };
 
+  // Keys match the field names produced by dataLoader.js parseRow()
   const RADAR_AXES = [
     { key: "prog_passes",   label: "Progressive passes" },
-    { key: "key_passes",    label: "Key passes" },
-    { key: "xA",            label: "xA" },
-    { key: "tackles",       label: "Tackles" },
-    { key: "interceptions", label: "Interceptions" },
-    { key: "xG",            label: "xG" },
+    { key: "key_passes",    label: "Key passes"         },
+    { key: "pass_acc",      label: "Pass completion %"  },
+    { key: "tackles",       label: "Tackles"            },
+    { key: "interceptions", label: "Interceptions"      },
+    { key: "goals_per90",   label: "Goals"              },
   ];
 
   const LEAGUE_COLORS = {
@@ -26,8 +27,23 @@ const DataTransforms = (() => {
     "Ligue 1":        "#8b5cf6",
   };
 
-  const CLUSTER_NAMES  = { 0: "Regista", 1: "Box-to-box", 2: "Destroyer", 3: "Creative MF", 4: "Pivot" };
-  const CLUSTER_COLORS = { 0: "#f0c060", 1: "#4ade80", 2: "#f87171", 3: "#60a5fa", 4: "#c084fc" };
+  // Cluster names are assigned manually after inspecting which players
+  // and stat profiles fall into each group. Update these when more seasons
+  // are added and clusters shift.
+  const CLUSTER_NAMES  = {
+    0: "Ball-winning passer",
+    1: "Box-to-box",
+    2: "Playmaker",
+    3: "Creative MF",
+    4: "Advanced playmaker",
+  };
+  const CLUSTER_COLORS = {
+    0: "#f0c060",
+    1: "#4ade80",
+    2: "#f87171",
+    3: "#60a5fa",
+    4: "#c084fc",
+  };
 
   function applyFilters(data, filters) {
     const f = filters || AppState.get("filters");

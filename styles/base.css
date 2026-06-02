@@ -1,5 +1,4 @@
-/* base.css — Resets, typography, global element styles
-*/
+/* base.css — Resets, typography, global element styles */
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -14,45 +13,69 @@ html {
 
 body {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   background-color: var(--bg-page);
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-med), color var(--transition-med);
 }
 
-/* Headings */
+/* Headings — serif display for storytelling weight */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  font-weight: 400;
-  line-height: 1.15;
+  font-weight: 700;
+  line-height: 1.12;
   color: var(--text-primary);
 }
 
-h1 { font-size: clamp(2.8rem, 7vw, 6rem); }
-h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); }
-h3 { font-size: 1.1rem; font-family: var(--font-body); font-weight: 500; letter-spacing: 0.01em; }
-h4 { font-size: 0.85rem; font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); }
+h1 { font-size: clamp(2.6rem, 6.5vw, 5.5rem); font-weight: 900; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1rem; font-family: var(--font-ui); font-weight: 600; letter-spacing: 0; }
+h4 { font-size: 0.72rem; font-family: var(--font-ui); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
 
-p { line-height: 1.7; }
+p { line-height: 1.72; }
 
 a {
   color: var(--text-accent);
   text-decoration: none;
 }
 
-a:hover { text-decoration: underline; }
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
-em { font-style: italic; color: var(--text-accent); }
+em {
+  font-style: italic;
+  color: var(--text-accent);
+}
 
-select, input, button {
-  font-family: var(--font-body);
+/* UI elements use the sans-serif stack */
+select, input, button, label {
+  font-family: var(--font-ui);
   font-size: 0.8rem;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg-page); }
 ::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+/* Theme transition for all themed elements */
+.global-header,
+.chart-card,
+.player-card,
+.weight-panel,
+.conclusion-card,
+.d3-tooltip,
+.filter-select,
+.control-select,
+.filter-input,
+.control-btn {
+  transition: background-color var(--transition-med),
+              border-color     var(--transition-med),
+              color            var(--transition-med);
+}
