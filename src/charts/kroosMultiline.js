@@ -1,33 +1,43 @@
 // Section 04 - Chart A
-// Multi-line chart of Kroos's key stats over all seasons.
-// Each metric is normalized to [0, 1] across his career so all lines
-// share a single y-axis, making trends comparable.
-// Active metrics are controlled by checkboxes built dynamically in init().
-// A vertical dashed line marks the retirement season (2023-24).
-//
-// Controls:
-//   #ctrl-04a-metrics — checkbox group (built in JS, one per METRICS entry)
-//
-// D3 features used: scalePoint, scaleLinear, line, curveMonotoneX,
-//                   stroke-dasharray animation, axisBottom, axisLeft
+// Multi-line chart of Kroos stats normalized to [0,1] per metric so all
+// lines share a single y-axis and trends are comparable.
+// Data comes from AppState.kroosData.kroos (kroos_stats.json).
+// With a single season loaded the chart shows a stat summary card instead.
 
 const KroosMultilineChart = (() => {
 
   const METRICS = [
-    { key: "prog_passes", label: "Progressive passes", color: "#f0c060" },
-    { key: "key_passes",  label: "Key passes",         color: "#60a5fa" },
-    { key: "xA",          label: "xA",                 color: "#4ade80" },
-    { key: "tackles",     label: "Tackles",            color: "#f87171" },
-    { key: "pass_acc",    label: "Pass accuracy",      color: "#c084fc" },
+    { key: "progressive_passes", label: "Progressive passes", color: "#f0c060" },
+    { key: "key_passes",         label: "Key passes",         color: "#60a5fa" },
+    { key: "tackles",            label: "Tackles",            color: "#4ade80" },
+    { key: "interceptions",      label: "Interceptions",      color: "#f87171" },
+    { key: "pass_completion_pct",label: "Pass completion %",  color: "#c084fc" },
   ];
 
+  const RETIREMENT_SEASON = "2023-24";
   let activeKeys = new Set(METRICS.map(m => m.key));
+
+  function css(v) {
+    return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  }
 
   function init() {
     buildCheckboxes();
-    AppState.on("data:ready", ({ players }) => {
-      draw(DataTransforms.kroosRows(players));
+
+    AppState.on("data:ready", () => draw());
+
+    const observer = new MutationObserver(() => {
+      if (AppState.get("kroosData")) draw();
     });
+    observer.observe(document.documentElement, {
+      attributes: true, attributeFilter: ["data-theme"],
+    });
+  }
+
+  function getKroosRows() {
+    const stored = AppState.get("kroosData");
+    if (!stored?.kroos?.length) return [];
+    return [...stored.kroos].sort((a, b) => a.season.localeCompare(b.season));
   }
 
   function buildCheckboxes() {
@@ -46,8 +56,7 @@ const KroosMultilineChart = (() => {
       cb.addEventListener("change", () => {
         if (cb.checked) activeKeys.add(m.key);
         else            activeKeys.delete(m.key);
-        const players = AppState.get("rawData");
-        if (players) draw(DataTransforms.kroosRows(players));
+        draw();
       });
 
       label.appendChild(cb);
@@ -56,22 +65,232 @@ const KroosMultilineChart = (() => {
     });
   }
 
-  function draw(data) {
+  function draw() {
     const wrap = document.querySelector("[data-chart='kroos-multiline']");
-    if (!wrap || !data.length) return;
+    if (!wrap) return;
 
-    // TODO: replace placeholder and render D3 multi-line chart
-    // Steps:
-    // 1. Normalize each active metric to [0,1] across the Kroos rows
-    // 2. Build xScale (scalePoint over seasons) and yScale (scaleLinear [0,1])
-    // 3. Draw horizontal grid lines from yScale ticks
-    // 4. Draw dashed vertical line at "2023-24" with label
-    // 5. For each active metric:
-    //    a. Append line path with curveMonotoneX in met.color
-    //    b. Animate with stroke-dasharray / dashoffset, duration 800ms
-    //    c. Append dot circles per data point with tooltip on hover
-    //       showing the raw (un-normalized) value for that season
-    // 6. Draw x-axis (rotated season labels) and y-axis (% format, 4 ticks)
+    const data = getKroosRows();
+    if (!data.length) return;
+
+    wrap.innerHTML = "";
+
+    if (data.length === 1) {
+      drawSingleSeason(wrap, data[0]);
+      return;
+    }
+
+    drawMultiline(wrap, data);
+  }
+
+  function drawMultiline(wrap, data) {
+    const W  = wrap.clientWidth  || 460;
+    const H  = wrap.clientHeight || 220;
+    const m  = { top: 20, right: 24, bottom: 52, left: 36 };
+    const iw = W - m.left - m.right;
+    const ih = H - m.top  - m.bottom;
+
+    const xScale = d3.scalePoint()
+      .domain(data.map(d => d.season))
+      .range([0, iw])
+      .padding(0.3);
+
+    const yScale = d3.scaleLinear().domain([0, 1]).range([ih, 0]);
+
+    // Normalize each metric to [0,1] across all Kroos seasons
+    const normed = data.map(row => {
+      const out = { season: row.season };
+      METRICS.forEach(met => {
+        const vals = data.map(d => +d[met.key] || 0);
+        const lo   = d3.min(vals);
+        const hi   = d3.max(vals);
+        out[met.key] = hi === lo ? 0.5 : ((+row[met.key] || 0) - lo) / (hi - lo);
+      });
+      return out;
+    });
+
+    const svg = d3.select(wrap)
+      .append("svg")
+        .attr("width",   "100%")
+        .attr("viewBox", `0 0 ${W} ${H}`)
+        .style("overflow", "visible");
+
+    const g = svg.append("g").attr("transform", `translate(${m.left},${m.top})`);
+
+    // Grid
+    yScale.ticks(4).forEach(t => {
+      g.append("line")
+        .attr("x1", 0).attr("x2", iw)
+        .attr("y1", yScale(t)).attr("y2", yScale(t))
+        .attr("stroke",       css("--chart-grid-color"))
+        .attr("stroke-width", 1);
+    });
+
+    // Retirement annotation
+    const retX = xScale(RETIREMENT_SEASON);
+    if (retX !== undefined) {
+      g.append("line")
+        .attr("x1", retX).attr("x2", retX)
+        .attr("y1", 0)    .attr("y2", ih)
+        .attr("stroke",           css("--kroos-color"))
+        .attr("stroke-width",     1)
+        .attr("stroke-dasharray", "4,3")
+        .attr("opacity",          0.45);
+
+      g.append("text")
+        .attr("x",           retX + 5)
+        .attr("y",           10)
+        .attr("fill",        css("--kroos-color"))
+        .attr("font-size",   "9px")
+        .attr("font-family", css("--font-ui"))
+        .attr("opacity",     0.7)
+        .text("Retirement");
+    }
+
+    const tooltip = d3.select("body").select(".d3-tooltip");
+    const active  = METRICS.filter(m => activeKeys.has(m.key));
+
+    active.forEach(met => {
+      const lineFn = d3.line()
+        .x( d => xScale(d.season))
+        .y( d => yScale(d[met.key]))
+        .curve(d3.curveMonotoneX);
+
+      const path = g.append("path")
+        .datum(normed)
+        .attr("d",               lineFn)
+        .attr("fill",            "none")
+        .attr("stroke",          met.color)
+        .attr("stroke-width",    2)
+        .attr("stroke-linejoin", "round");
+
+      const len = path.node().getTotalLength();
+      path
+        .attr("stroke-dasharray",  `${len} ${len}`)
+        .attr("stroke-dashoffset", len)
+        .transition().duration(800).ease(d3.easeCubicOut)
+        .attr("stroke-dashoffset", 0);
+
+      g.selectAll(`.dot-${met.key}`)
+        .data(normed)
+        .join("circle")
+          .attr("cx",    d => xScale(d.season))
+          .attr("cy",    d => yScale(d[met.key]))
+          .attr("r",     4)
+          .attr("fill",   met.color)
+          .attr("stroke", css("--bg-surface"))
+          .attr("stroke-width", 1.5)
+          .on("mouseover", (event, d) => {
+            const raw = data.find(r => r.season === d.season);
+            tooltip.classed("visible", true)
+              .html(`
+                <div class="tooltip-name">${d.season}</div>
+                <div class="tooltip-row">
+                  <span>${met.label}</span>
+                  <span class="tooltip-val">${(+raw?.[met.key] || 0).toFixed(2)}</span>
+                </div>
+              `);
+          })
+          .on("mousemove", event => {
+            tooltip
+              .style("left", (event.clientX + 14) + "px")
+              .style("top",  (event.clientY - 32) + "px");
+          })
+          .on("mouseout", () => tooltip.classed("visible", false));
+    });
+
+    // X axis
+    const xAxisG = g.append("g")
+      .attr("transform", `translate(0,${ih})`)
+      .call(d3.axisBottom(xScale).tickSize(4).tickPadding(8));
+    xAxisG.select(".domain").attr("stroke", css("--chart-axis-color"));
+    xAxisG.selectAll(".tick line").attr("stroke", css("--chart-axis-color"));
+    xAxisG.selectAll("text")
+      .attr("fill",         css("--chart-text-color"))
+      .attr("font-size",    "9px")
+      .attr("font-family",  css("--font-ui"))
+      .attr("transform",    "rotate(-35)")
+      .style("text-anchor", "end");
+
+    // Y axis
+    const yAxisG = g.append("g")
+      .call(d3.axisLeft(yScale).ticks(4).tickFormat(d3.format(".0%")).tickSize(4).tickPadding(6));
+    yAxisG.select(".domain").attr("stroke", css("--chart-axis-color"));
+    yAxisG.selectAll(".tick line").attr("stroke", css("--chart-axis-color"));
+    yAxisG.selectAll("text")
+      .attr("fill",        css("--chart-text-color"))
+      .attr("font-size",   "9px")
+      .attr("font-family", css("--font-ui"));
+
+    // Inline legend at bottom
+    const legendG = svg.append("g")
+      .attr("transform", `translate(${m.left}, ${H - 12})`);
+
+    let lx = 0;
+    active.forEach(met => {
+      legendG.append("circle")
+        .attr("cx", lx + 5).attr("cy", 0).attr("r", 4)
+        .attr("fill", met.color);
+      legendG.append("text")
+        .attr("x",               lx + 13)
+        .attr("dominant-baseline", "middle")
+        .attr("fill",            css("--text-muted"))
+        .attr("font-size",       "9px")
+        .attr("font-family",     css("--font-ui"))
+        .text(met.label);
+      lx += met.label.length * 5.8 + 22;
+    });
+  }
+
+  function drawSingleSeason(wrap, d) {
+    const W  = wrap.clientWidth  || 460;
+    const H  = wrap.clientHeight || 220;
+
+    const svg = d3.select(wrap)
+      .append("svg")
+        .attr("width",   "100%")
+        .attr("viewBox", `0 0 ${W} ${H}`);
+
+    const active = METRICS.filter(m => activeKeys.has(m.key));
+    const cols   = Math.min(active.length, 3);
+    const rows   = Math.ceil(active.length / cols);
+    const cellW  = W / cols;
+    const cellH  = (H - 32) / rows;
+
+    active.forEach((met, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const cx  = col * cellW + cellW / 2;
+      const cy  = row * cellH + cellH / 2;
+
+      svg.append("text")
+        .attr("x",               cx)
+        .attr("y",               cy - 10)
+        .attr("text-anchor",     "middle")
+        .attr("dominant-baseline","middle")
+        .attr("fill",            met.color)
+        .attr("font-size",       "22px")
+        .attr("font-family",     css("--font-display"))
+        .attr("font-weight",     "700")
+        .text((+d[met.key] || 0).toFixed(2));
+
+      svg.append("text")
+        .attr("x",               cx)
+        .attr("y",               cy + 14)
+        .attr("text-anchor",     "middle")
+        .attr("fill",            css("--text-muted"))
+        .attr("font-size",       "9px")
+        .attr("font-family",     css("--font-ui"))
+        .text(met.label);
+    });
+
+    svg.append("text")
+      .attr("x",           W / 2)
+      .attr("y",           H - 8)
+      .attr("text-anchor", "middle")
+      .attr("fill",        css("--text-muted"))
+      .attr("font-size",   "9px")
+      .attr("font-family", css("--font-ui"))
+      .text(`${d.season}  ·  Add more seasons to data/raw/ to see trends`);
   }
 
   return { init };

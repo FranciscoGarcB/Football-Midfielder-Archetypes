@@ -33,7 +33,7 @@ const DataTransforms = (() => {
   const CLUSTER_NAMES  = {
     0: "Ball-winning passer",
     1: "Box-to-box",
-    2: "Playmaker",
+    2: "Regista / Playmaker",
     3: "Creative MF",
     4: "Advanced playmaker",
   };
