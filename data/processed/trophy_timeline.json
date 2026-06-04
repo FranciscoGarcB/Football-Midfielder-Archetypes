@@ -1,17 +1,5 @@
 [
   {
-    "season":"2017-18",
-    "laliga":false,
-    "copa":false,
-    "ucl":true
-  },
-  {
-    "season":"2018-19",
-    "laliga":true,
-    "copa":false,
-    "ucl":false
-  },
-  {
     "season":"2019-20",
     "laliga":true,
     "copa":false,
