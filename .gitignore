@@ -1,3 +1,5 @@
 .venv
 *.pdf
 .DS_Store
+*.ipynb
+*downloaded_files
