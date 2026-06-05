@@ -476,3 +476,68 @@
   font-size: 0.7rem;
   color: var(--text-primary);
 }
+
+/* Scatter player search */
+.scatter-search-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.scatter-search-input {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 5px 9px;
+  width: 160px;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.scatter-search-input:focus {
+  border-color: var(--text-accent);
+}
+
+.scatter-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* Dropdown is positioned via JS using getBoundingClientRect so it
+   floats over everything and never pushes its parent container. */
+.scatter-search-dropdown {
+  position: fixed;
+  width: 260px;
+  background: var(--chart-tooltip-bg);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  list-style: none;
+  z-index: 500;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.scatter-search-dropdown li {
+  padding: 6px 12px;
+  font-family: var(--font-ui);
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scatter-search-dropdown li:hover,
+.scatter-search-dropdown li.active {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.scatter-search-dropdown li .search-league {
+  color: var(--text-muted);
+}
+

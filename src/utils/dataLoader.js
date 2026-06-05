@@ -51,7 +51,6 @@ const DataLoader = (() => {
 
       prog_passes:  +d.progressive_passes || 0,
       key_passes:   +d.key_passes          || 0,
-      pass_acc:     +d.pass_completion_pct || 0,
 
       tackles:       +d.tackles        || 0,
       interceptions: +d.interceptions  || 0,

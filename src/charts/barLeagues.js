@@ -9,7 +9,6 @@ const BarLeaguesChart = (() => {
   const METRIC_LABELS = {
     prog_passes:   "Progressive passes / 90",
     key_passes:    "Key passes / 90",
-    pass_acc:      "Pass completion %",
     tackles:       "Tackles / 90",
     interceptions: "Interceptions / 90",
     goals_per90:   "Goals / 90",

@@ -5,7 +5,7 @@ Downloads midfielder stats from FBref via soccerdata for the Big 5 European
 Leagues across the relevant seasons, then saves the three stat tables to
 data/raw/ for process_data.py to consume.
 
-Run once (requires internet + soccerdata library):
+Run once (requires internet + soccerdata installed):
     pip install soccerdata
     python data/scrape.py
 """
@@ -29,7 +29,7 @@ def process_df(dataframe: pd.DataFrame) -> pd.DataFrame:
 
     # Filter to midfielders only
     if "pos" in dataframe.columns:
-        dataframe = dataframe[dataframe["pos"].str.contains("MF", na=False)]
+        dataframe = dataframe[dataframe["pos"].str.contains(r"^MF", na=False)]
         dataframe.drop("pos", axis=1, inplace=True)
 
     # Normalize season codes: soccerdata uses integers like 1920, 2122, etc.
@@ -73,11 +73,23 @@ shooting_data = fbref.read_player_season_stats(stat_type="shooting")
 print("Fetching misc stats...")
 misc_data = fbref.read_player_season_stats(stat_type="misc")
 
+# print("Fetching play_time stats...")
+# playingtime_data = fbref.read_player_season_stats(stat_type="playing_time")
+
 dfs = {
     "standard_data": standard_data,
     "shooting_data": shooting_data,
-    "misc_data":     misc_data,
+    "misc_data":     misc_data
+    # "play_time": playingtime_data
 }
+
+for name in dfs:
+    dfs[name] = process_df(dfs[name])
+
+# Print columns so process_data.py can be tuned if needed
+for name, df in dfs.items():
+    print(f"\n{name} columns ({len(df.columns)}):")
+    print("  " + ", ".join(df.columns.tolist()))
 
 for name in dfs:
     dfs[name] = process_df(dfs[name])

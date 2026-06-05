@@ -53,14 +53,13 @@ VALID_LEAGUES = {
 # These are the internal names after the column mapping below.
 # All values must be per-90 minutes.
 FEATURE_COLS = [
-    "progressive_passes",   # Standard_Sh/90 proxy — actually from misc
-    "key_passes",           # Per 90 Minutes_Ast  (assists as key passes proxy)
-    "pass_completion_pct",  # no direct col — derived below
-    "tackles_won",          # Performance_TklW / 90s
-    "interceptions",        # Performance_Int  / 90s
-    "goals_per90",          # Per 90 Minutes_Gls
-    "assists_per90",        # Per 90 Minutes_Ast
-    "shots_per90",          # Standard_Sh/90
+    "progressive_passes",
+    "key_passes",
+    "tackles_won",
+    "interceptions",
+    "goals_per90",
+    "assists_per90",
+    "shots_per90",
 ]
 
 TROPHY_TIMELINE = [
@@ -105,24 +104,24 @@ def extract_standard(df: pd.DataFrame) -> pd.DataFrame:
         Performance_CrdR       -> red_cards
     """
     col_map = {
-        "player":                  "player",
-        "team":                    "team",
-        "league":                  "league",
-        "season":                  "season",
-        "nation":                  "nationality",
-        "age":                     "age",
-        "Playing Time_Min":        "minutes",
-        "Playing Time_90s":        "nineties",
-        "Per 90 Minutes_Gls":      "goals_per90",
-        "Per 90 Minutes_Ast":      "assists_per90",
-        "Per 90 Minutes_G+A-PK":   "ga_nopk_per90",
-        "Performance_CrdY":        "yellow_cards",
-        "Performance_CrdR":        "red_cards",
+        "player":                "player",
+        "team":                  "team",
+        "league":                "league",
+        "season":                "season",
+        "nation":                "nationality",
+        "age":                   "age",
+        "Playing Time_Min":      "minutes",
+        "Per 90 Minutes_Gls":    "goals_per90",
+        "Per 90 Minutes_Ast":    "assists_per90",
+        "Per 90 Minutes_G+A-PK": "ga_nopk_per90",
+        "Performance_CrdY":      "yellow_cards",
+        "Performance_CrdR":      "red_cards",
     }
-    # 90s may come as a standalone column after process_df flattening
-    if "Playing Time_90s" not in df.columns and "90s" in df.columns:
+
+    if "Playing Time_90s" in df.columns:
+        col_map["Playing Time_90s"] = "nineties"
+    elif "90s" in df.columns:
         col_map["90s"] = "nineties"
-        del col_map["Playing Time_90s"]
 
     available = {k: v for k, v in col_map.items() if k in df.columns}
     out = df[list(available.keys())].rename(columns=available).copy()
@@ -205,20 +204,6 @@ def derive_per90_cols(df: pd.DataFrame) -> pd.DataFrame:
 
     if "crosses_total" in df.columns:
         df["crosses_per90"] = (df["crosses_total"] / n).round(4)
-
-    # progressive_passes: soccerdata standard does not expose PasProg directly.
-    # We use ga_nopk_per90 scaled as a creativity proxy when no better column
-    # is available.  If a passing table is added later, replace this column.
-    if "progressive_passes" not in df.columns:
-        df["progressive_passes"] = df.get("ga_nopk_per90", pd.Series(0, index=df.index)).fillna(0)
-
-    # key_passes: use assists_per90 as proxy (most common available stand-in)
-    if "key_passes" not in df.columns:
-        df["key_passes"] = df.get("assists_per90", pd.Series(0, index=df.index)).fillna(0)
-
-    # pass_completion_pct: set to 0 if not available; does not affect PCA much
-    if "pass_completion_pct" not in df.columns:
-        df["pass_completion_pct"] = 0.0
 
     df["interceptions"] = df.get("interceptions",  pd.Series(0, index=df.index)).fillna(0)
     df["tackles_won"]   = df.get("tackles_won",    pd.Series(0, index=df.index)).fillna(0)
@@ -305,14 +290,13 @@ def build_players_csv(df: pd.DataFrame) -> pd.DataFrame:
     cols = [
         "player_id", "player", "team", "league", "season",
         "age", "nationality", "minutes",
-        "progressive_passes", "key_passes", "pass_completion_pct",
+        "progressive_passes", "key_passes",
         "tackles_won", "interceptions",
         "goals_per90", "assists_per90", "shots_per90",
         "cluster", "pc1", "pc2", "similarity_to_kroos",
     ]
     cols = [c for c in cols if c in df.columns]
     out  = df[cols].sort_values(["season", "player"])
-    # Rename tackles_won -> tackles for the JS layer (dataLoader expects "tackles")
     out  = out.rename(columns={"tackles_won": "tackles", "shots_per90": "shots"})
     return out
 

@@ -180,7 +180,6 @@
             <select class="control-select" id="ctrl-02b-metric">
               <option value="prog_passes">Progressive passes / 90</option>
               <option value="key_passes">Key passes / 90</option>
-              <option value="pass_acc">Pass completion %</option>
               <option value="tackles">Tackles / 90</option>
               <option value="interceptions">Interceptions / 90</option>
               <option value="goals_per90">Goals / 90</option>
@@ -220,14 +219,25 @@
       <div class="chart-card__header">
         <h3 class="chart-card__title">Midfielder PCA space</h3>
         <div class="chart-card__controls">
+          <div class="scatter-search-wrap" id="scatter-search-wrap">
+            <input
+              type="text"
+              class="scatter-search-input"
+              id="scatter-search"
+              placeholder="Search player..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <ul class="scatter-search-dropdown" id="scatter-search-dropdown" hidden></ul>
+          </div>
           <select class="control-select" id="ctrl-03a-season">
             <option value="all">All seasons</option>
           </select>
           <select class="control-select" id="ctrl-03a-color">
             <option value="cluster">Color: Cluster</option>
             <option value="league">Color: League</option>
-            <option value="xA">Color: xA</option>
-            <option value="prog_passes">Color: Progressive passes</option>
+            <option value="goals_per90">Color: Goals / 90</option>
+            <option value="assists_per90">Color: Assists / 90</option>
           </select>
           <button class="control-btn" id="ctrl-03a-reset">Reset zoom</button>
         </div>
@@ -426,11 +436,11 @@
       <h2 class="footer-title">Findings</h2>
       <div class="conclusions-grid" id="conclusions-grid">
         <div class="conclusion-card conclusion-card--placeholder">
-          Findings will appear here once data is loaded.
+         TODO.
         </div>
       </div>
       <p class="footer-credit">
-        Data: FBref via soccerdata library for Python. &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
+        Data: FBref via Kaggle &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
         Visualization: D3.js &middot; Analysis: Python (pandas, scikit-learn)
       </p>
     </div>

@@ -4,19 +4,18 @@
 const DataTransforms = (() => {
 
   const FEATURE_GROUPS = {
-    passing: ["prog_passes", "key_passes", "pass_acc"],
+    passing: ["prog_passes", "key_passes"],
     defense: ["tackles", "interceptions"],
     attack:  ["goals_per90", "assists_per90", "shots"],
   };
 
-  // Keys match the field names produced by dataLoader.js parseRow()
   const RADAR_AXES = [
     { key: "prog_passes",   label: "Progressive passes" },
     { key: "key_passes",    label: "Key passes"         },
-    { key: "pass_acc",      label: "Pass completion %"  },
     { key: "tackles",       label: "Tackles"            },
     { key: "interceptions", label: "Interceptions"      },
     { key: "goals_per90",   label: "Goals"              },
+    { key: "assists_per90", label: "Assists"            },
   ];
 
   const LEAGUE_COLORS = {

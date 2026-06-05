@@ -22,6 +22,9 @@ const PcaScatterChart = (() => {
     return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   }
 
+  // Tracks which player name is currently highlighted via search
+  let highlightedName = null;
+
   function init() {
     AppState.on("data:ready", ({ players }) => {
       allData = players.filter(d => isFinite(d.pc1) && isFinite(d.pc2));
@@ -43,7 +46,12 @@ const PcaScatterChart = (() => {
       });
 
     document.getElementById("ctrl-03a-reset")
-      ?.addEventListener("click", resetZoom);
+      ?.addEventListener("click", () => {
+        clearSearch();
+        resetZoom();
+      });
+
+    initSearch();
 
     const observer = new MutationObserver(() => {
       if (svgEl) redrawAxes();
@@ -51,6 +59,154 @@ const PcaScatterChart = (() => {
     observer.observe(document.documentElement, {
       attributes: true, attributeFilter: ["data-theme"],
     });
+  }
+
+  function initSearch() {
+    const input    = document.getElementById("scatter-search");
+    const dropdown = document.getElementById("scatter-search-dropdown");
+    if (!input || !dropdown) return;
+
+    let activeIndex = -1;
+
+    input.addEventListener("input", () => {
+      const q = input.value.trim().toLowerCase();
+      activeIndex = -1;
+
+      if (q.length < 2) {
+        closeDropdown();
+        if (!q) clearSearch();
+        return;
+      }
+
+      const names = [...new Set(allData.map(d => d.name))]
+        .filter(n => n.toLowerCase().includes(q))
+        .sort((a, b) => {
+          const aStarts = a.toLowerCase().startsWith(q);
+          const bStarts = b.toLowerCase().startsWith(q);
+          if (aStarts && !bStarts) return -1;
+          if (!aStarts && bStarts) return 1;
+          return a.localeCompare(b);
+        })
+        .slice(0, 12);
+
+      if (!names.length) {
+        closeDropdown();
+        return;
+      }
+
+      dropdown.innerHTML = "";
+      names.forEach(name => {
+        const sample = allData.find(d => d.name === name);
+        const li = document.createElement("li");
+        li.dataset.name = name;
+        li.textContent = sample?.league ? `${name} — ${sample.league}` : name;
+        li.addEventListener("mousedown", e => {
+          e.preventDefault();
+          selectSearchResult(name);
+        });
+        dropdown.appendChild(li);
+      });
+
+      // Position with fixed coords so the dropdown floats outside any
+      // overflow:hidden ancestor (the card header).
+      const rect = input.getBoundingClientRect();
+      dropdown.style.top  = (rect.bottom + 4) + "px";
+      dropdown.style.left = rect.left + "px";
+      dropdown.hidden = false;
+    });
+
+    // Keyboard navigation
+    input.addEventListener("keydown", e => {
+      const items = dropdown.querySelectorAll("li");
+      if (!items.length) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, items.length - 1);
+        updateActiveItem(items, activeIndex);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+        updateActiveItem(items, activeIndex);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        const active = dropdown.querySelector("li.active");
+        if (active) selectSearchResult(active.dataset.name);
+      } else if (e.key === "Escape") {
+        clearSearch();
+      }
+    });
+
+    input.addEventListener("blur", () => {
+      // Small delay so mousedown on a list item fires first
+      setTimeout(closeDropdown, 150);
+    });
+  }
+
+  function updateActiveItem(items, index) {
+    items.forEach((li, i) => li.classList.toggle("active", i === index));
+    items[index]?.scrollIntoView({ block: "nearest" });
+  }
+
+  function selectSearchResult(name) {
+    const input    = document.getElementById("scatter-search");
+    const dropdown = document.getElementById("scatter-search-dropdown");
+    if (input)    input.value = name;
+    if (dropdown) dropdown.hidden = true;
+
+    highlightedName = name;
+    applySearchHighlight();
+  }
+
+  function applySearchHighlight() {
+    if (!gDots) return;
+    if (!highlightedName) {
+      gDots.selectAll("circle")
+        .attr("opacity",      d => d.name === "Toni Kroos" ? 1 : 0.72)
+        .attr("stroke",       d => d.name === "Toni Kroos" ? "white" : "none")
+        .attr("stroke-width", d => d.name === "Toni Kroos" ? 1.5 : 0)
+        .attr("r",            d => d.name === "Toni Kroos" ? 8 : 4);
+      return;
+    }
+
+    gDots.selectAll("circle")
+      .attr("opacity", d => {
+        if (d.name === highlightedName) return 1;
+        if (d.name === "Toni Kroos")   return 0.6;
+        return 0.06;
+      })
+      .attr("r", d => {
+        if (d.name === highlightedName) return 7;
+        if (d.name === "Toni Kroos")   return 8;
+        return 4;
+      })
+      .attr("stroke", d => {
+        if (d.name === highlightedName) return "white";
+        if (d.name === "Toni Kroos")   return "white";
+        return "none";
+      })
+      .attr("stroke-width", d =>
+        (d.name === highlightedName || d.name === "Toni Kroos") ? 1.5 : 0
+      );
+
+    // Raise highlighted dots so they sit on top
+    gDots.selectAll("circle")
+      .filter(d => d.name === highlightedName)
+      .raise();
+  }
+
+  function clearSearch() {
+    highlightedName = null;
+    const input    = document.getElementById("scatter-search");
+    const dropdown = document.getElementById("scatter-search-dropdown");
+    if (input)    input.value = "";
+    if (dropdown) dropdown.hidden = true;
+    applySearchHighlight();
+  }
+
+  function closeDropdown() {
+    const dropdown = document.getElementById("scatter-search-dropdown");
+    if (dropdown) dropdown.hidden = true;
   }
 
   function populateSeasonDropdown() {
@@ -320,6 +476,9 @@ const PcaScatterChart = (() => {
     gDots.selectAll("circle")
       .filter(d => isKroos(d))
       .raise();
+
+    // Re-apply any active search highlight after the join
+    applySearchHighlight();
   }
 
   function updateColors() {
