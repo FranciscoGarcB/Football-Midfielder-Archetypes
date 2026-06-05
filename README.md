@@ -9,7 +9,7 @@ An interactive data visualization exploring midfielder archetypes across the top
 1. How do the top midfielder archetypes differ across the Premier League, La Liga, Serie A, Bundesliga, and Ligue 1?
 2. Which active players share a statistical profile closest to Toni Kroos?
 
-The motivation: after Kroos retired in June 2024, Real Madrid went two consecutive seasons without a major trophy — an almost unprecedented outcome in the club's modern history.
+The motivation: after Kroos retired in June 2024, Real Madrid went two consecutive seasons without a major trophy - an almost unprecedented outcome in the club's modern history.
 
 ---
 
@@ -170,15 +170,6 @@ numpy
 
 ```
 d3 v7   https://cdn.jsdelivr.net/npm/d3@7
-```
-
-### Fonts (loaded via Google Fonts)
-
-```
-Fraunces   display headings
-Lora       body text
-Inter      UI labels and controls
-IBM Plex Mono   numeric values
 ```
 
 ---
