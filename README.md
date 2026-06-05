@@ -2,8 +2,6 @@
 
 An interactive data visualization exploring midfielder archetypes across the top 5 European football leagues (2017–2025), centered around the question: what made Toni Kroos irreplaceable, and who comes closest to filling that role today?
 
-Built as a course project for Information Visualization at TU Wien.
-
 ---
 
 ## Research Questions
