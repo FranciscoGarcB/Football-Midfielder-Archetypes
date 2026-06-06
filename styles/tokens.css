@@ -1,0 +1,133 @@
+/* tokens.css — Design tokens, color palette, and theme definitions */
+
+/* Dark theme (default) */
+:root,
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-page:    #141210;
+  --bg-surface: #1b1916;
+  --bg-raised:  #232019;
+  --bg-hover:   #2c271f;
+  --bg-alt:     #181512;
+
+  /* Text */
+  --text-primary:   #f0ede6;
+  --text-secondary: #a09b90;
+  --text-muted:     #5c5750;
+
+  /* Accent — gold */
+  --text-accent:    #f0c060;
+  --accent-subtle:  rgba(240, 192, 96, 0.10);
+  --accent-border:  rgba(240, 192, 96, 0.26);
+
+  /* Borders */
+  --border-subtle:  rgba(255, 255, 255, 0.055);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong:  rgba(255, 255, 255, 0.22);
+
+  /* Kroos identity — same gold as accent in dark mode */
+  --kroos-color:    #f0c060;
+  --kroos-subtle:   rgba(240, 192, 96, 0.10);
+  --kroos-border:   rgba(240, 192, 96, 0.26);
+  --kroos-contrast: #141210;
+
+  /* League colors — muted, print-inspired, not neon */
+  --league-premier:    #4a7fb5;
+  --league-laliga:     #b84040;
+  --league-seriea:     #3a8c7e;
+  --league-bundesliga: #b87c30;
+  --league-ligue1:     #7b5ea7;
+
+  /* Cluster / archetype colors — earthy, distinct but not loud */
+  --cluster-0: #d4943a;
+  --cluster-1: #5a9e6f;
+  --cluster-2: #b84040;
+  --cluster-3: #4a7fb5;
+  --cluster-4: #8c6dab;
+
+  /* Chart internals */
+  --chart-axis-color:  #3a3530;
+  --chart-grid-color:  #242018;
+  --chart-text-color:  #7a7468;
+  --chart-tooltip-bg:  #1b1916;
+
+  /* Theme toggle icon */
+  --theme-icon: "Light";
+}
+
+/* Light theme */
+[data-theme="light"] {
+  /* Backgrounds — clean white, modern light grays */
+  --bg-page:    #f4f4f5;
+  --bg-surface: #ffffff;
+  --bg-raised:  #ffffff;
+  --bg-hover:   #e8e8eb;
+  --bg-alt:     #ececee;
+
+  /* Text — near-black with neutral undertone */
+  --text-primary:   #111113;
+  --text-secondary: #52525b;
+  --text-muted:     #a1a1aa;
+
+  /* Accent — gold darkened for legibility on white */
+  --text-accent:    #b8861a;
+  --accent-subtle:  rgba(184, 134, 26, 0.09);
+  --accent-border:  rgba(184, 134, 26, 0.22);
+
+  /* Borders — neutral, no warm tint */
+  --border-subtle:  rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.11);
+  --border-strong:  rgba(0, 0, 0, 0.26);
+
+  /* Kroos identity */
+  --kroos-color:    #b8861a;
+  --kroos-subtle:   rgba(184, 134, 26, 0.09);
+  --kroos-border:   rgba(184, 134, 26, 0.22);
+  --kroos-contrast: #ffffff;
+
+  /* League colors — same hues, darkened for legibility on light */
+  --league-premier:    #2d5e94;
+  --league-laliga:     #a02828;
+  --league-seriea:     #247066;
+  --league-bundesliga: #9a6220;
+  --league-ligue1:     #5e4090;
+
+  /* Cluster colors */
+  --cluster-0: #b87828;
+  --cluster-1: #3a7d52;
+  --cluster-2: #a02828;
+  --cluster-3: #2d5e94;
+  --cluster-4: #6a4e8e;
+
+  /* Chart internals */
+  --chart-axis-color:  #d4d4d8;
+  --chart-grid-color:  #e4e4e7;
+  --chart-text-color:  #71717a;
+  --chart-tooltip-bg:  #ffffff;
+
+  --theme-icon: "Dark";
+}
+
+/* Spacing — unchanged across themes */
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Lora', Georgia, serif;
+  --font-ui:      'Inter', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', 'Fira Mono', monospace;
+
+  --space-xs:  4px;
+  --space-sm:  8px;
+  --space-md:  16px;
+  --space-lg:  24px;
+  --space-xl:  40px;
+  --space-2xl: 80px;
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 18px;
+
+  --transition-fast: 140ms ease;
+  --transition-med:  280ms ease;
+  --transition-slow: 480ms ease;
+}
