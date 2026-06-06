@@ -8,16 +8,18 @@
 const KroosSeasonChart = (() => {
 
   const METRICS = {
-    progressive_passes: "Progressive passes / 90",
-    key_passes:         "Key passes / 90",
-    tackles:            "Tackles / 90",
-    interceptions:      "Interceptions / 90",
-    pass_completion_pct:"Pass completion %",
+    xa_per90:         "xA / 90",
+    key_passes_per90: "Key passes / 90",
+    np_xg_per90:      "npxG / 90",
+    goals_per90:      "Goals / 90",
+    assists_per90:    "Assists / 90",
+    tackles:          "Tackles / 90",
+    interceptions:    "Interceptions / 90",
   };
 
   const RETIREMENT_SEASON = "2023-24";
 
-  let currentMetric = "progressive_passes";
+  let currentMetric = "xa_per90";
 
   function css(v) {
     return getComputedStyle(document.documentElement).getPropertyValue(v).trim();

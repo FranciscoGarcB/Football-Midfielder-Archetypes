@@ -4,18 +4,18 @@
 const DataTransforms = (() => {
 
   const FEATURE_GROUPS = {
-    passing: ["prog_passes", "key_passes"],
-    defense: ["tackles", "interceptions"],
-    attack:  ["goals_per90", "assists_per90", "shots"],
+    passing:  ["xa_per90", "key_passes_per90", "assists_per90"],
+    defense:  ["tackles", "interceptions"],
+    attack:   ["goals_per90", "np_xg_per90", "shots"],
   };
 
   const RADAR_AXES = [
-    { key: "prog_passes",   label: "Progressive passes" },
-    { key: "key_passes",    label: "Key passes"         },
-    { key: "tackles",       label: "Tackles"            },
-    { key: "interceptions", label: "Interceptions"      },
-    { key: "goals_per90",   label: "Goals"              },
-    { key: "assists_per90", label: "Assists"            },
+    { key: "xa_per90",         label: "xA / 90"           },
+    { key: "key_passes_per90", label: "Key passes / 90"   },
+    { key: "np_xg_per90",      label: "npxG / 90"         },
+    { key: "goals_per90",      label: "Goals / 90"        },
+    { key: "tackles",          label: "Tackles / 90"      },
+    { key: "interceptions",    label: "Interceptions"     },
   ];
 
   const LEAGUE_COLORS = {
@@ -29,19 +29,17 @@ const DataTransforms = (() => {
   // Cluster names are assigned manually after inspecting which players
   // and stat profiles fall into each group. Update these when more seasons
   // are added and clusters shift.
-  const CLUSTER_NAMES  = {
-    0: "Ball-winning passer",
+    const CLUSTER_NAMES  = {
+    0: "Defensive Midfielders ",
     1: "Box-to-box",
-    2: "Regista / Playmaker",
-    3: "Creative MF",
-    4: "Advanced playmaker",
+    2: "Circulation Midfielders",
+    3: "Attacking Central Midfielders",
   };
   const CLUSTER_COLORS = {
-    0: "#f0c060",
+    0: "#f87171",
     1: "#4ade80",
-    2: "#f87171",
+    2: "#f0c060",
     3: "#60a5fa",
-    4: "#c084fc",
   };
 
   function applyFilters(data, filters) {
@@ -54,6 +52,15 @@ const DataTransforms = (() => {
     });
   }
 
+  // All metrics that leagueProfiles will average — superset of RADAR_AXES
+  const ALL_METRICS = [
+    "goals_per90", "assists_per90", "ga_nopk_per90",
+    "shots", "shots_on_target", "goals_per_shot",
+    "tackles", "interceptions", "fouls_drawn", "crosses",
+    "xa_per90", "key_passes_per90", "np_xg_per90",
+    "xg_chain", "xg_buildup",
+  ];
+
   function leagueProfiles(data, topPct = 0.1) {
     const byLeague = d3.group(data, d => d.league);
     const result = [];
@@ -61,7 +68,7 @@ const DataTransforms = (() => {
       const minMin = d3.quantile(players.map(p => p.minutes).sort(d3.ascending), 1 - topPct) || 0;
       const top = players.filter(p => p.minutes >= minMin);
       const profile = { league };
-      RADAR_AXES.forEach(ax => { profile[ax.key] = d3.mean(top, d => d[ax.key]) ?? 0; });
+      ALL_METRICS.forEach(k => { profile[k] = d3.mean(top, d => d[k]) ?? 0; });
       result.push(profile);
     });
     return result;
@@ -153,4 +160,4 @@ const DataTransforms = (() => {
   };
 })();
 
-window.DataTransforms = DataTransforms;
+window.DataTransforms = DataTransforms;s

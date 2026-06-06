@@ -6,7 +6,7 @@ Leagues across the relevant seasons, then saves the three stat tables to
 data/raw/ for process_data.py to consume.
 
 Run once (requires internet + soccerdata installed):
-    pip install soccerdata
+    pip install soccerdata pandas
     python data/scrape.py
 """
 
@@ -15,37 +15,10 @@ import soccerdata as sd
 import pandas as pd
 
 
-def process_df(dataframe: pd.DataFrame) -> pd.DataFrame:
-    dataframe.columns = [
-        f"{col[0]}_{col[1]}" if col[0] and not col[0].startswith("Unnamed") else col[1]
-        for col in dataframe.columns
-    ]
-    dataframe.columns = [col.rstrip("_") for col in dataframe.columns]
-    dataframe = dataframe.reset_index()
-
-    if "league" in dataframe.columns:
-        dataframe["league"] = dataframe["league"].fillna("Bundesliga")
-        dataframe["league"] = dataframe["league"].astype(str).str.split("-").str[-1]
-
-    # Filter to midfielders only
-    if "pos" in dataframe.columns:
-        dataframe = dataframe[dataframe["pos"].str.contains(r"^MF", na=False)]
-        dataframe.drop("pos", axis=1, inplace=True)
-
-    # Normalize season codes: soccerdata uses integers like 1920, 2122, etc.
-    # Convert to the "YYYY-YY" string format used throughout the project.
-    if "season" in dataframe.columns:
-        dataframe["season"] = dataframe["season"].apply(season_int_to_label)
-
-    return dataframe
-
-
 def season_int_to_label(code) -> str:
     """
     Converts soccerdata season codes to readable labels.
-    1920  ->  '2019-20'
-    2223  ->  '2022-23'
-    2526  ->  '2025-26'
+    1920 -> '2019-20', 2223 -> '2022-23', 2526 -> '2025-26'
     """
     s = str(int(code))
     if len(s) == 4:
@@ -53,6 +26,49 @@ def season_int_to_label(code) -> str:
         end   = s[2:]
         return f"{start}-{end}"
     return str(code)
+
+
+def flatten(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Converts a soccerdata DataFrame (MultiIndex columns + MultiIndex index)
+    into a flat, clean DataFrame ready to save as CSV.
+
+    Order of operations matters:
+      1. reset_index() first — moves league/season/team/player from the index
+         into regular columns while they still have their original string names.
+      2. Flatten MultiIndex columns — at this point the index columns are
+         already plain strings, so no truncation occurs.
+      3. Strip trailing underscores left by unnamed top-level groups.
+    """
+    df = df.reset_index()
+
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = [
+            f"{top}_{bot}" if top and not top.startswith("Unnamed") else bot
+            for top, bot in df.columns
+        ]
+    df.columns = [col.rstrip("_") for col in df.columns]
+
+    return df
+
+
+def process_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Post-flattening cleanup: normalize league names, filter to midfielders,
+    convert season codes.
+    """
+    if "league" in df.columns:
+        df["league"] = df["league"].fillna("Bundesliga")
+        df["league"] = df["league"].astype(str).str.split("-").str[-1]
+
+    if "pos" in df.columns:
+        df = df[df["pos"].str.contains("MF", na=False)].copy()
+        df.drop(columns=["pos"], inplace=True)
+
+    if "season" in df.columns:
+        df["season"] = df["season"].apply(season_int_to_label)
+
+    return df
 
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "raw")
@@ -73,30 +89,41 @@ shooting_data = fbref.read_player_season_stats(stat_type="shooting")
 print("Fetching misc stats...")
 misc_data = fbref.read_player_season_stats(stat_type="misc")
 
-# print("Fetching play_time stats...")
-# playingtime_data = fbref.read_player_season_stats(stat_type="playing_time")
-
 dfs = {
     "standard_data": standard_data,
     "shooting_data": shooting_data,
-    "misc_data":     misc_data
-    # "play_time": playingtime_data
+    "misc_data":     misc_data,
 }
 
 for name in dfs:
-    dfs[name] = process_df(dfs[name])
-
-# Print columns so process_data.py can be tuned if needed
-for name, df in dfs.items():
-    print(f"\n{name} columns ({len(df.columns)}):")
-    print("  " + ", ".join(df.columns.tolist()))
-
-for name in dfs:
-    dfs[name] = process_df(dfs[name])
+    dfs[name] = process_df(flatten(dfs[name]))
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+print("Fetching Understat stats...")
+understat = sd.Understat(
+    leagues=["ENG-Premier League", "ESP-La Liga", "FRA-Ligue 1",
+             "GER-Bundesliga", "ITA-Serie A"],
+    seasons=SEASONS,
+)
+understat_data = understat.read_player_season_stats(force_cache=True)
+understat_data = process_df(flatten(understat_data))
+
+# Keep only the columns that add value over FBref
+UNDERSTAT_KEEP = [
+    "player", "league", "season",
+    "xg", "np_xg", "xa", "key_passes",
+    "xg_chain", "xg_buildup",
+]
+understat_data = understat_data[[c for c in UNDERSTAT_KEEP if c in understat_data.columns]]
+
+path = os.path.join(OUTPUT_DIR, "understat_data.csv")
+understat_data.to_csv(path, index=False, encoding="utf-8")
+print(f"  Saved {path}  ({len(understat_data)} rows)")
 
 for name, df in dfs.items():
     path = os.path.join(OUTPUT_DIR, f"{name}.csv")
     df.to_csv(path, index=False, encoding="utf-8")
+    print(f"\n{name} columns ({len(df.columns)}):")
+    print("  " + ", ".join(df.columns.tolist()))
     print(f"  Saved {path}  ({len(df)} rows)")

@@ -17,7 +17,7 @@ const KroosVsLeagueRadarChart = (() => {
       const seasons = DataTransforms.kroosRows(players).map(d => d.season);
       currentSeason = seasons[seasons.length - 1] || null;
       populateSeasonDropdown(seasons);
-      if (currentSeason) draw(players, currentSeason);
+      if (currentSeason) requestAnimationFrame(() => draw(players, currentSeason));
     });
 
     AppState.on("filters:changed", () => {

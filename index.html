@@ -21,7 +21,7 @@
 
   <header class="global-header" id="global-header">
     <div class="header-brand">
-      <span class="brand-title">Player Archetypes in European Football</span>
+      <span class="brand-title">Player Archetypes</span>
     </div>
 
     <nav class="section-nav" id="section-nav">
@@ -64,7 +64,7 @@
   <section class="hero" id="hero">
     <div class="hero-content">
       <p class="hero-eyebrow">Top 5 European Leagues &middot; 2017&ndash;2025</p>
-      <h1 class="hero-title">Player Archetypes<em>Analysis</em></h1>
+      <h1 class="hero-title">Midfielder<em>Player Archetypes</em></h1>
       <p class="hero-sub">
         In June 2024, Toni Kroos retired. Real Madrid went on to win no major
         trophy in either of the two following seasons &mdash; an outcome almost
@@ -123,11 +123,13 @@
           <h3 class="chart-card__title">Kroos stats by season</h3>
           <div class="chart-card__controls">
             <select class="control-select" id="ctrl-01b-metric">
-              <option value="progressive_passes">Progressive passes / 90</option>
-              <option value="key_passes">Key passes / 90</option>
+              <option value="xa_per90">xA / 90</option>
+              <option value="key_passes_per90">Key passes / 90</option>
+              <option value="np_xg_per90">npxG / 90</option>
+              <option value="goals_per90">Goals / 90</option>
+              <option value="assists_per90">Assists / 90</option>
               <option value="tackles">Tackles / 90</option>
               <option value="interceptions">Interceptions / 90</option>
-              <option value="pass_completion_pct">Pass completion %</option>
             </select>
           </div>
         </div>
@@ -178,11 +180,12 @@
           <h3 class="chart-card__title">Metric comparison</h3>
           <div class="chart-card__controls">
             <select class="control-select" id="ctrl-02b-metric">
-              <option value="prog_passes">Progressive passes / 90</option>
-              <option value="key_passes">Key passes / 90</option>
+              <option value="xa_per90">xA / 90</option>
+              <option value="key_passes_per90">Key passes / 90</option>
+              <option value="np_xg_per90">npxG / 90</option>
+              <option value="goals_per90">Goals / 90</option>
               <option value="tackles">Tackles / 90</option>
               <option value="interceptions">Interceptions / 90</option>
-              <option value="goals_per90">Goals / 90</option>
             </select>
             <select class="control-select" id="ctrl-02b-sort">
               <option value="value">Sort: value</option>
@@ -436,11 +439,11 @@
       <h2 class="footer-title">Findings</h2>
       <div class="conclusions-grid" id="conclusions-grid">
         <div class="conclusion-card conclusion-card--placeholder">
-         TODO.
+          TODO.
         </div>
       </div>
       <p class="footer-credit">
-        Data: FBref via Kaggle &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
+        Data: FBref via soccerdata library &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
         Visualization: D3.js &middot; Analysis: Python (pandas, scikit-learn)
       </p>
     </div>

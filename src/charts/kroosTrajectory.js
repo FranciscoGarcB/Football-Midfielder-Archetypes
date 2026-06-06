@@ -28,7 +28,7 @@ const KroosTrajectoryChart = (() => {
       kroosData = allData
         .filter(d => d.name === "Toni Kroos")
         .sort((a, b) => a.season.localeCompare(b.season));
-      draw();
+      requestAnimationFrame(() => draw());
     });
 
     document.getElementById("ctrl-04c-play")?.addEventListener("click",  togglePlay);

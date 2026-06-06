@@ -7,14 +7,15 @@
 const BarLeaguesChart = (() => {
 
   const METRIC_LABELS = {
-    prog_passes:   "Progressive passes / 90",
-    key_passes:    "Key passes / 90",
-    tackles:       "Tackles / 90",
-    interceptions: "Interceptions / 90",
-    goals_per90:   "Goals / 90",
+    xa_per90:         "xA / 90",
+    key_passes_per90: "Key passes / 90",
+    np_xg_per90:      "npxG / 90",
+    goals_per90:      "Goals / 90",
+    tackles:          "Tackles / 90",
+    interceptions:    "Interceptions / 90",
   };
 
-  let currentMetric = "prog_passes";
+  let currentMetric = "xa_per90";
   let currentSort   = "value";
 
   function css(v) {
@@ -22,7 +23,7 @@ const BarLeaguesChart = (() => {
   }
 
   function init() {
-    AppState.on("data:ready", ({ players }) => draw(players));
+    AppState.on("data:ready", ({ players }) => requestAnimationFrame(() => draw(players)));
     AppState.on("filters:changed", () => redraw());
 
     document.getElementById("ctrl-02b-metric")?.addEventListener("change", e => {

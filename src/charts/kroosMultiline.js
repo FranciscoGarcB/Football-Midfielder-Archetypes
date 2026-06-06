@@ -7,11 +7,12 @@
 const KroosMultilineChart = (() => {
 
   const METRICS = [
-    { key: "progressive_passes", label: "Progressive passes", color: "#f0c060" },
-    { key: "key_passes",         label: "Key passes",         color: "#60a5fa" },
-    { key: "tackles",            label: "Tackles",            color: "#4ade80" },
-    { key: "interceptions",      label: "Interceptions",      color: "#f87171" },
-    { key: "pass_completion_pct",label: "Pass completion %",  color: "#c084fc" },
+    { key: "xa_per90",         label: "xA / 90",           color: "#f0c060" },
+    { key: "key_passes_per90", label: "Key passes / 90",   color: "#60a5fa" },
+    { key: "np_xg_per90",      label: "npxG / 90",         color: "#a78bfa" },
+    { key: "goals_per90",      label: "Goals / 90",        color: "#fb923c" },
+    { key: "tackles",          label: "Tackles / 90",      color: "#4ade80" },
+    { key: "interceptions",    label: "Interceptions / 90",color: "#f87171" },
   ];
 
   const RETIREMENT_SEASON = "2023-24";
@@ -24,7 +25,7 @@ const KroosMultilineChart = (() => {
   function init() {
     buildCheckboxes();
 
-    AppState.on("data:ready", () => draw());
+    AppState.on("data:ready", () => requestAnimationFrame(() => draw()));
 
     const observer = new MutationObserver(() => {
       if (AppState.get("kroosData")) draw();

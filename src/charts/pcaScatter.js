@@ -28,9 +28,13 @@ const PcaScatterChart = (() => {
   function init() {
     AppState.on("data:ready", ({ players }) => {
       allData = players.filter(d => isFinite(d.pc1) && isFinite(d.pc2));
-      buildSVG();
       populateSeasonDropdown();
-      update();
+      // Defer until the browser has completed layout so clientWidth/clientHeight
+      // return real values, not 0.
+      requestAnimationFrame(() => {
+        buildSVG();
+        update();
+      });
     });
 
     AppState.on("filters:changed",       () => update());
