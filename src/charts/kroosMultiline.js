@@ -8,9 +8,9 @@ const KroosMultilineChart = (() => {
 
   const METRICS = [
     { key: "progressive_passes_per90", label: "Prog. passes / 90", color: "#f0c060" },
-    { key: "key_passes_per90",         label: "Key passes / 90",   color: "#60a5fa" },
-    { key: "xa_per90",                 label: "xA / 90",           color: "#a78bfa" },
-    { key: "np_xg_per90",              label: "npxG / 90",         color: "#fb923c" },
+    { key: "xa_per90",                 label: "xA / 90",           color: "#60a5fa" },
+    { key: "long_pass_pct",            label: "Long pass %",       color: "#a78bfa" },
+    { key: "gca_per90",                label: "GCA / 90",          color: "#fb923c" },
     { key: "tackles",                  label: "Tackles / 90",      color: "#4ade80" },
     { key: "interceptions",            label: "Interceptions / 90",color: "#f87171" },
   ];

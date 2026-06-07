@@ -42,7 +42,7 @@ KROOS_NAME        = "Toni Kroos"
 KROOS_PRIME_START = "2019-20"
 KROOS_PRIME_END   = "2022-23"
 MIN_MINUTES       = 900
-N_CLUSTERS        = 4
+N_CLUSTERS        = 5
 PCA_COMPONENTS    = 2
 RANDOM_SEED       = 42
 
@@ -61,16 +61,21 @@ VALID_LEAGUES = {
 # PCA is restricted to players that have all of these populated (i.e. matched
 # in player_data). This guarantees no zeros from missing joins distort the space.
 FEATURE_COLS = [
-    "goals_per90",              # Per 90 Minutes_Gls        (FBref standard)
-    "assists_per90",            # Per 90 Minutes_Ast        (FBref standard)
-    "np_xg_per90",              # np_xg / (minutes/90)      (Understat)
-    "xa_per90",                 # xa / (minutes/90)         (Understat)
-    "progressive_passes_per90", # Progressive Passes / 90s  (player_data CSVs)
-    "key_passes_per90",         # Key passes / 90s          (player_data CSVs)
-    "pass_completion_pct",      # Pass completion %         (player_data CSVs)
-    "shots_per90",              # Standard_Sh/90            (FBref shooting)
-    "tackles_won",              # Performance_TklW / 90s    (FBref misc)
-    "interceptions",            # Performance_Int / 90s     (FBref misc)
+    "goals_per90",              # Per 90 Minutes_Gls           (FBref standard)
+    "assists_per90",            # Per 90 Minutes_Ast           (FBref standard)
+    "np_xg_per90",              # np_xg / (minutes/90)         (Understat)
+    "xa_per90",                 # xa / (minutes/90)            (Understat)
+    "progressive_passes_per90", # Progressive Passes / 90s     (player_data)
+    "key_passes_per90",         # Key passes / 90s             (player_data)
+    "pass_completion_pct",      # Pass completion %            (player_data)
+    "long_pass_pct",            # % Long passes completed      (player_data) — Kroos signature
+    "gca_per90",                # Goal creating actions / 90   (player_data) — builder vs finisher
+    "prog_carries_per90",       # Progressive carries / 90     (player_data) — carrier vs passer
+    "carries_final_third_per90",# Carries into final third / 90 (player_data) — vertical threat
+    "shots_per90",              # Standard_Sh/90               (FBref shooting)
+    "tackles_won",              # Performance_TklW / 90s       (FBref misc)
+    "interceptions",            # Performance_Int / 90s        (FBref misc)
+    "fouls_committed_per90",    # Performance_Fls / 90s        (FBref misc) — defensive intensity
 ]
 
 TROPHY_TIMELINE = [
@@ -154,6 +159,7 @@ def extract_misc(df: pd.DataFrame) -> pd.DataFrame:
         "Performance_Int":    "interceptions_total",
         "Performance_TklW":   "tackles_won_total",
         "Performance_Fld":    "fouls_drawn_total",
+        "Performance_Fls":    "fouls_committed_total",
         "Performance_Crs":    "crosses_total",
     }
     if "90s" in df.columns:
@@ -273,16 +279,20 @@ def extract_player_data(df: pd.DataFrame) -> pd.DataFrame:
         Matches Played             -> used to derive pd_nineties, then dropped
     """
     col_map = {
-        "player":                    "player",
-        "comp":                      "league",
-        "season":                    "season",
-        "Progressive Passes":        "prog_passes_total",
-        "Key passes":                "key_passes_total_pd",
-        "Pass completion %":         "pass_completion_pct",
-        "Shot creating actions p 90":"sca_per90",
-        "1/3":                       "passes_final_third_total",
-        "Avg Mins per Match":        "avg_mins",
-        "Matches Played":            "matches_played",
+        "player":                      "player",
+        "comp":                        "league",
+        "season":                      "season",
+        "Progressive Passes":          "prog_passes_total",
+        "Key passes":                  "key_passes_total_pd",
+        "Pass completion %":           "pass_completion_pct",
+        "% Long passes completed":     "long_pass_pct",
+        "Shot creating actions p 90":  "sca_per90",
+        "Goal creating actions p 90":  "gca_per90",
+        "Progressive Carries":         "prog_carries_total",
+        "carries final 3rd":           "carries_final_third_total",
+        "1/3":                         "passes_final_third_total",
+        "Avg Mins per Match":          "avg_mins",
+        "Matches Played":              "matches_played",
     }
     available = {k: v for k, v in col_map.items() if k in df.columns}
     out = df[list(available.keys())].rename(columns=available).copy()
@@ -410,11 +420,29 @@ def derive_per90_cols(df: pd.DataFrame) -> pd.DataFrame:
             pd.to_numeric(df["key_passes_total"], errors="coerce") / n_pd
         ).round(4)
 
-    # pass_completion_pct comes pre-computed in the CSV, no division needed
-    if "pass_completion_pct" in df.columns:
-        df["pass_completion_pct"] = pd.to_numeric(
-            df["pass_completion_pct"], errors="coerce"
-        ).fillna(0)
+    # pass_completion_pct and long_pass_pct come pre-computed — no division needed
+    for pct_col in ["pass_completion_pct", "long_pass_pct"]:
+        if pct_col in df.columns:
+            df[pct_col] = pd.to_numeric(df[pct_col], errors="coerce").fillna(0)
+
+    # gca_per90 already per-90 in the CSV
+    if "gca_per90" in df.columns:
+        df["gca_per90"] = pd.to_numeric(df["gca_per90"], errors="coerce").fillna(0)
+
+    # player_data carry totals → per-90
+    if "prog_carries_total" in df.columns:
+        df["prog_carries_per90"] = (
+            pd.to_numeric(df["prog_carries_total"], errors="coerce") / n_pd
+        ).round(4)
+
+    if "carries_final_third_total" in df.columns:
+        df["carries_final_third_per90"] = (
+            pd.to_numeric(df["carries_final_third_total"], errors="coerce") / n_pd
+        ).round(4)
+
+    # FBref misc fouls committed → per-90
+    if "fouls_committed_total" in df.columns:
+        df["fouls_committed_per90"] = (df["fouls_committed_total"] / n).round(4)
 
     # Ensure all FEATURE_COLS exist, filling missing values with 0
     for col in FEATURE_COLS:
@@ -435,8 +463,9 @@ def clean(df: pd.DataFrame) -> pd.DataFrame:
         "tackles_won", "interceptions", "fouls_drawn_per90",
         "xa_per90", "key_passes_per90", "np_xg_per90",
         "xg_chain", "xg_buildup",
-        "progressive_passes_per90", "pass_completion_pct", "sca_per90",
-        "passes_final_third_total",
+        "progressive_passes_per90", "pass_completion_pct", "long_pass_pct",
+        "gca_per90", "prog_carries_per90", "carries_final_third_per90",
+        "sca_per90", "passes_final_third_total", "fouls_committed_per90",
     ]
     for col in numeric_cols:
         if col in df.columns:
@@ -457,7 +486,10 @@ def run_pca_and_clustering(df: pd.DataFrame):
     # Restrict PCA to players that have all player_data columns populated.
     # This ensures pass_completion_pct, progressive_passes_per90 and
     # key_passes_per90 are real values, not zeros from unmatched joins.
-    pd_cols = ["progressive_passes_per90", "key_passes_per90", "pass_completion_pct"]
+    pd_cols = [
+        "progressive_passes_per90", "key_passes_per90", "pass_completion_pct",
+        "long_pass_pct", "gca_per90", "prog_carries_per90", "carries_final_third_per90",
+    ]
     has_pd  = df_active[pd_cols].notna().all(axis=1) & df_active[pd_cols].gt(0).any(axis=1)
     n_with    = has_pd.sum()
     n_without = (~has_pd).sum()
@@ -520,7 +552,10 @@ def build_players_csv(df: pd.DataFrame) -> pd.DataFrame:
         "tackles_won", "interceptions", "fouls_drawn_per90", "crosses_per90",
         # player_data season CSVs
         "progressive_passes_per90", "key_passes_per90", "pass_completion_pct",
+        "long_pass_pct", "gca_per90", "prog_carries_per90", "carries_final_third_per90",
         "sca_per90", "passes_final_third_total",
+        # FBref misc (additional)
+        "fouls_committed_per90",
         # Understat
         "xa_per90", "np_xg_per90", "xg_chain", "xg_buildup",
         # PCA + clustering
@@ -570,10 +605,15 @@ def build_pca_json(df: pd.DataFrame, variance: list) -> dict:
             "fouls_drawn":              g("fouls_drawn_per90"),
             "crosses":                  g("crosses_per90"),
             # player_data season CSVs
-            "progressive_passes_per90": g("progressive_passes_per90"),
-            "key_passes_per90":         g("key_passes_per90"),
-            "pass_completion_pct":      g("pass_completion_pct"),
-            "sca_per90":                g("sca_per90"),
+            "progressive_passes_per90":  g("progressive_passes_per90"),
+            "key_passes_per90":          g("key_passes_per90"),
+            "pass_completion_pct":       g("pass_completion_pct"),
+            "long_pass_pct":             g("long_pass_pct"),
+            "gca_per90":                 g("gca_per90"),
+            "prog_carries_per90":        g("prog_carries_per90"),
+            "carries_final_third_per90": g("carries_final_third_per90"),
+            "sca_per90":                 g("sca_per90"),
+            "fouls_committed_per90":     g("fouls_committed_per90"),
             # Understat
             "xa_per90":                 g("xa_per90"),
             "np_xg_per90":              g("np_xg_per90"),
@@ -612,10 +652,15 @@ def build_kroos_json(df: pd.DataFrame) -> dict:
             "fouls_drawn":              f("fouls_drawn_per90"),
             "crosses":                  f("crosses_per90"),
             # player_data season CSVs
-            "progressive_passes_per90": f("progressive_passes_per90"),
-            "key_passes_per90":         f("key_passes_per90"),
-            "pass_completion_pct":      f("pass_completion_pct"),
-            "sca_per90":                f("sca_per90"),
+            "progressive_passes_per90":  f("progressive_passes_per90"),
+            "key_passes_per90":          f("key_passes_per90"),
+            "pass_completion_pct":       f("pass_completion_pct"),
+            "long_pass_pct":             f("long_pass_pct"),
+            "gca_per90":                 f("gca_per90"),
+            "prog_carries_per90":        f("prog_carries_per90"),
+            "carries_final_third_per90": f("carries_final_third_per90"),
+            "sca_per90":                 f("sca_per90"),
+            "fouls_committed_per90":     f("fouls_committed_per90"),
             # Understat
             "xa_per90":                 f("xa_per90"),
             "np_xg_per90":              f("np_xg_per90"),
@@ -723,12 +768,14 @@ def main():
     print("Writing trophy_timeline.json...")
     with open(os.path.join(PROCESSED_DIR, "trophy_timeline.json"), "w", encoding="utf-8") as f:
         json.dump(TROPHY_TIMELINE, f, separators=(",", ":"), indent=2)
-        
+
+    print()
     print(f"  Seasons:       {sorted(df['season'].unique())}")
     print(f"  Total players: {df['player'].nunique()}")
     print(f"  Kroos seasons: {sorted(df[df['player'] == KROOS_NAME]['season'].tolist())}")
 
     print_cluster_profiles(df)
+
 
 if __name__ == "__main__":
     main()

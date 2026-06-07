@@ -10,6 +10,8 @@ const BarLeaguesChart = (() => {
     progressive_passes_per90: "Progressive passes / 90",
     key_passes_per90:         "Key passes / 90",
     xa_per90:                 "xA / 90",
+    long_pass_pct:            "Long pass %",
+    gca_per90:                "GCA / 90",
     np_xg_per90:              "npxG / 90",
     goals_per90:              "Goals / 90",
     tackles:                  "Tackles / 90",
