@@ -30,18 +30,19 @@ const DataTransforms = (() => {
   // and stat profiles fall into each group. Update these when more seasons
   // are added and clusters shift.
   const CLUSTER_NAMES  = {
-    0: "Wide Midfielder",
-    1: "Wingers & Inside Forward",
-    2: "Defensive Midfielder",
-    3: "Playmaker",
-    4: "Central Tempo Dictators",
+      0: "Wide Players",
+      1: "Attackers",
+      2: "Defensive Mids",
+      3: "Playmakers",
+      4: "Central Mids"
   };
+
   const CLUSTER_COLORS = {
-    0: "#f0c060",
+    0: "#c084fc",
     1: "#4ade80",
     2: "#f87171",
     3: "#60a5fa",
-    4: "#c084fc",
+    4: "#f0c060",
   };
 
   function applyFilters(data, filters) {
