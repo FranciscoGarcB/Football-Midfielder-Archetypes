@@ -443,10 +443,7 @@ const PcaScatterChart = (() => {
                   <span>Role</span>
                   <span class="tooltip-val">${DataTransforms.CLUSTER_NAMES[d.cluster] || "—"}</span>
                 </div>
-                <div class="tooltip-row">
-                  <span>Prog. passes</span>
-                  <span class="tooltip-val">${d.prog_passes?.toFixed(1) ?? "—"}</span>
-                </div>
+
               `);
           })
           .on("mousemove", event => {

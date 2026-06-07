@@ -13,7 +13,7 @@ const SuccessorRankingChart = (() => {
   }
 
   function init() {
-    AppState.on("data:ready", ({ players }) => requestAnimationFrame(() => draw(players)));
+    AppState.on("data:ready", ({ players }) => requestAnimationFrame(() => requestAnimationFrame(() => draw(players))));
     AppState.on("weights:changed", () => redraw());
 
     ["passing", "defense", "attack"].forEach(dim => {

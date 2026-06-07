@@ -281,8 +281,6 @@ const KroosTrajectoryChart = (() => {
             </div>
             <div class="tooltip-row">
               <span>Prog. passes</span>
-              <span class="tooltip-val">${(cur.prog_passes || 0).toFixed(1)}</span>
-            </div>
           `);
       })
       .on("mousemove", event => {
