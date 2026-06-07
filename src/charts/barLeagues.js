@@ -7,15 +7,16 @@
 const BarLeaguesChart = (() => {
 
   const METRIC_LABELS = {
-    xa_per90:         "xA / 90",
-    key_passes_per90: "Key passes / 90",
-    np_xg_per90:      "npxG / 90",
-    goals_per90:      "Goals / 90",
-    tackles:          "Tackles / 90",
-    interceptions:    "Interceptions / 90",
+    progressive_passes_per90: "Progressive passes / 90",
+    key_passes_per90:         "Key passes / 90",
+    xa_per90:                 "xA / 90",
+    np_xg_per90:              "npxG / 90",
+    goals_per90:              "Goals / 90",
+    tackles:                  "Tackles / 90",
+    interceptions:            "Interceptions / 90",
   };
 
-  let currentMetric = "xa_per90";
+  let currentMetric = "progressive_passes_per90";
   let currentSort   = "value";
 
   function css(v) {

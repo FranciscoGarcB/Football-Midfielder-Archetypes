@@ -4,18 +4,18 @@
 const DataTransforms = (() => {
 
   const FEATURE_GROUPS = {
-    passing:  ["xa_per90", "key_passes_per90", "assists_per90"],
+    passing:  ["progressive_passes_per90", "key_passes_per90", "xa_per90", "pass_completion_pct"],
     defense:  ["tackles", "interceptions"],
     attack:   ["goals_per90", "np_xg_per90", "shots"],
   };
 
   const RADAR_AXES = [
-    { key: "xa_per90",         label: "xA / 90"           },
-    { key: "key_passes_per90", label: "Key passes / 90"   },
-    { key: "np_xg_per90",      label: "npxG / 90"         },
-    { key: "goals_per90",      label: "Goals / 90"        },
-    { key: "tackles",          label: "Tackles / 90"      },
-    { key: "interceptions",    label: "Interceptions"     },
+    { key: "progressive_passes_per90", label: "Prog. passes / 90" },
+    { key: "key_passes_per90",         label: "Key passes / 90"   },
+    { key: "xa_per90",                 label: "xA / 90"           },
+    { key: "np_xg_per90",              label: "npxG / 90"         },
+    { key: "tackles",                  label: "Tackles / 90"      },
+    { key: "interceptions",            label: "Interceptions"     },
   ];
 
   const LEAGUE_COLORS = {
@@ -29,17 +29,19 @@ const DataTransforms = (() => {
   // Cluster names are assigned manually after inspecting which players
   // and stat profiles fall into each group. Update these when more seasons
   // are added and clusters shift.
-    const CLUSTER_NAMES  = {
-    0: "Defensive Midfielders ",
-    1: "Playmakers",
-    2: "Circulation Midfielders",
-    3: "Attacking Central Midfielders",
+  const CLUSTER_NAMES  = {
+    0: "Ball-winning passer",
+    1: "Box-to-box",
+    2: "Regista / Playmaker",
+    3: "Creative MF",
+    4: "Advanced playmaker",
   };
   const CLUSTER_COLORS = {
-    0: "#f87171",
+    0: "#f0c060",
     1: "#4ade80",
-    2: "#f0c060",
+    2: "#f87171",
     3: "#60a5fa",
+    4: "#c084fc",
   };
 
   function applyFilters(data, filters) {
@@ -57,8 +59,8 @@ const DataTransforms = (() => {
     "goals_per90", "assists_per90", "ga_nopk_per90",
     "shots", "shots_on_target", "goals_per_shot",
     "tackles", "interceptions", "fouls_drawn", "crosses",
-    "xa_per90", "key_passes_per90", "np_xg_per90",
-    "xg_chain", "xg_buildup",
+    "progressive_passes_per90", "key_passes_per90", "pass_completion_pct", "sca_per90",
+    "xa_per90", "np_xg_per90", "xg_chain", "xg_buildup",
   ];
 
   function leagueProfiles(data, topPct = 0.1) {
@@ -160,4 +162,4 @@ const DataTransforms = (() => {
   };
 })();
 
-window.DataTransforms = DataTransforms;s
+window.DataTransforms = DataTransforms;
