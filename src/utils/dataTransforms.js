@@ -31,7 +31,7 @@ const DataTransforms = (() => {
   // are added and clusters shift.
     const CLUSTER_NAMES  = {
     0: "Defensive Midfielders ",
-    1: "Box-to-box",
+    1: "Playmakers",
     2: "Circulation Midfielders",
     3: "Attacking Central Midfielders",
   };
