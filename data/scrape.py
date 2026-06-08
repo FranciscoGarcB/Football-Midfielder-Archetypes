@@ -73,7 +73,7 @@ def process_df(df: pd.DataFrame) -> pd.DataFrame:
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "raw")
 
-SEASONS = [1920, 2021, 2122, 2223, 2324, 2425, 2526]
+SEASONS = [1920, 2021, 2122, 2223, 2324]
 
 fbref = sd.FBref(
     leagues="Big 5 European Leagues Combined",
