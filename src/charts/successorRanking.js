@@ -50,8 +50,15 @@ const SuccessorRankingChart = (() => {
     const leagueFilter = AppState.get("successorLeague") || "all";
     const latest       = DataTransforms.latestSeasonPerPlayer(data);
 
+    // Define the last two active seasons in your dataset
+    const lastTwoSeasons = ["2023-24", "2024-25"];
+
+    // Apply the new filters: age < 30 and season must be one of the last two
     let candidates = latest.filter(d =>
-      d.name !== "Toni Kroos" && d.minutes >= 900
+      d.name !== "Toni Kroos" &&
+      d.minutes >= 900 &&
+      d.age < 30 &&
+      lastTwoSeasons.includes(d.season)
     );
 
     if (leagueFilter !== "all") {
@@ -77,17 +84,42 @@ const SuccessorRankingChart = (() => {
       centroid[ax.key] = d3.mean(kroosRows, d => d[ax.key] || 0) || 0;
     });
 
-    const scored = candidates.map(d => {
-      const dp = DataTransforms.euclidean(d, centroid, DataTransforms.FEATURE_GROUPS.passing);
-      const dd = DataTransforms.euclidean(d, centroid, DataTransforms.FEATURE_GROUPS.defense);
-      const da = DataTransforms.euclidean(d, centroid, DataTransforms.FEATURE_GROUPS.attack);
-      const dist = (weights.passing * dp + weights.defense * dd + weights.attack * da) / wTotal;
-      return { ...d, dist };
-    });
+    // Helper function to calculate dot product of weighted feature arrays
+    function weightedCosine(player, kroosCentroid, currentWeights) {
+      let dotProduct = 0;
+      let normA = 0;
+      let normB = 0;
 
-    const maxDist = d3.max(scored, d => d.dist) || 1;
-    return scored
-      .map(d => ({ ...d, score: 1 - d.dist / maxDist }))
+      const groups = {
+        passing: DataTransforms.FEATURE_GROUPS.passing,
+        defense: DataTransforms.FEATURE_GROUPS.defense,
+        attack:  DataTransforms.FEATURE_GROUPS.attack
+      };
+
+      Object.keys(groups).forEach(groupKey => {
+        const weight = currentWeights[groupKey] || 0;
+        const features = groups[groupKey];
+
+        features.forEach(feat => {
+          const valA = (player[feat] || 0) * weight;
+          const valB = (kroosCentroid[feat] || 0) * weight;
+
+          dotProduct += valA * valB;
+          normA += valA * valA;
+          normB += valB * valB;
+        });
+      });
+
+      if (normA === 0 || normB === 0) return 0;
+      return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
+
+    // Score players using the weighted cosine function
+    return candidates
+      .map(d => {
+        const score = weightedCosine(d, centroid, weights);
+        return { ...d, score: Math.max(0, score) }; // Clamp negative correlations to 0
+      })
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
   }

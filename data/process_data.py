@@ -497,12 +497,25 @@ def run_pca_and_clustering(df: pd.DataFrame):
               f"{KROOS_PRIME_START}–{KROOS_PRIME_END}.")
         df_pca["similarity_to_kroos"] = 0.0
     else:
-        centroid  = scaler.transform(
+        # 1. Compute Kroos's prime centroid coordinate
+        centroid = scaler.transform(
             [kroos_prime[FEATURE_COLS].fillna(0).mean().values]
         )[0]
-        distances = np.linalg.norm(X_scaled - centroid, axis=1)
+
+        # 2. Define custom weights corresponding EXACTLY to FEATURE_COLS
+        # FEATURE_COLS: goals, assists, np_xg, xa, prog_passes, key_passes, pass_cmp%, shots, tackles, int
+        weights = np.array([0.2, 1.5, 0.2, 2.0, 3.0, 2.5, 3.0, 0.2, 0.5, 0.5])
+
+        # 3. Apply weights to both the dataset and the centroid
+        X_scaled_weighted = X_scaled * weights
+        centroid_weighted = centroid * weights
+
+        # 4. Calculate distances in the newly weighted space
+        distances = np.linalg.norm(X_scaled_weighted - centroid_weighted, axis=1)
+
+        # 5. Invert distance to a clean 0-1 similarity score
         df_pca["similarity_to_kroos"] = (
-            1 - distances / (distances.max() or 1)
+                1 - distances / (distances.max() or 1)
         ).round(4)
 
     pca_cols = ["player_id", "pc1", "pc2", "cluster", "similarity_to_kroos"]
