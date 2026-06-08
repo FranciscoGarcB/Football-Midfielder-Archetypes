@@ -28,26 +28,14 @@ const PcaScatterChart = (() => {
   function init() {
     AppState.on("data:ready", ({ players }) => {
       allData = players.filter(d => isFinite(d.pc1) && isFinite(d.pc2));
-      populateSeasonDropdown();
-      // Defer until the browser has completed layout so clientWidth/clientHeight
-      // return real values, not 0.
       requestAnimationFrame(() => {
         buildSVG();
         update();
       });
     });
 
-    AppState.on("filters:changed",       () => update());
-    AppState.on("filter:cluster",        id  => highlightCluster(+id));
-    AppState.on("change:scatterColorBy", ()  => updateColors());
-
-    document.getElementById("ctrl-03a-season")
-      ?.addEventListener("change", () => update());
-
-    document.getElementById("ctrl-03a-color")
-      ?.addEventListener("change", e => {
-        AppState.set("scatterColorBy", e.target.value);
-      });
+    AppState.on("filters:changed", () => update());
+    AppState.on("filter:cluster",  id => highlightCluster(+id));
 
     document.getElementById("ctrl-03a-reset")
       ?.addEventListener("click", () => {
@@ -213,39 +201,13 @@ const PcaScatterChart = (() => {
     if (dropdown) dropdown.hidden = true;
   }
 
-  function populateSeasonDropdown() {
-    const sel = document.getElementById("ctrl-03a-season");
-    if (!sel) return;
-    (AppState.get("availableSeasons") || []).forEach(s => {
-      const o = document.createElement("option");
-      o.value = s;
-      o.textContent = s;
-      sel.appendChild(o);
-    });
-  }
 
   function filteredData() {
-    const f      = AppState.get("filters");
-    const season = document.getElementById("ctrl-03a-season")?.value || "all";
-    return allData.filter(d => {
-      if (f.league !== "all" && d.league !== f.league)  return false;
-      if (season   !== "all" && d.season !== season)    return false;
-      if (d.minutes < f.minMinutes)                     return false;
-      return true;
-    });
+    return DataTransforms.applyFilters(allData);
   }
 
   function makeColorFn() {
-    const enc = AppState.get("scatterColorBy") || "cluster";
-    if (enc === "cluster") {
-      return d => DataTransforms.CLUSTER_COLORS[d.cluster] || "#888";
-    }
-    if (enc === "league") {
-      return d => DataTransforms.LEAGUE_COLORS[d.league] || "#888";
-    }
-    const ext   = d3.extent(allData, d => +d[enc] || 0);
-    const scale = d3.scaleSequential(d3.interpolateYlOrRd).domain(ext);
-    return d => scale(+d[enc] || 0);
+    return d => DataTransforms.CLUSTER_COLORS[d.cluster] || "#888";
   }
 
   function buildSVG() {
@@ -482,13 +444,6 @@ const PcaScatterChart = (() => {
     applySearchHighlight();
   }
 
-  function updateColors() {
-    colorFn = makeColorFn();
-    if (!gDots) return;
-    gDots.selectAll("circle")
-      .filter(d => d.name !== "Toni Kroos")
-      .attr("fill", d => colorFn(d));
-  }
 
   function highlightCluster(clusterId) {
     if (!gDots) return;

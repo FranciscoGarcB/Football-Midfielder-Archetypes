@@ -23,8 +23,6 @@ const KroosMultilineChart = (() => {
   }
 
   function init() {
-    buildCheckboxes();
-
     AppState.on("data:ready", () => requestAnimationFrame(() => draw()));
 
     const observer = new MutationObserver(() => {
@@ -41,30 +39,6 @@ const KroosMultilineChart = (() => {
     return [...stored.kroos].sort((a, b) => a.season.localeCompare(b.season));
   }
 
-  function buildCheckboxes() {
-    const wrap = document.getElementById("ctrl-04a-metrics");
-    if (!wrap) return;
-
-    METRICS.forEach(m => {
-      const label = document.createElement("label");
-      label.className = "metric-checkbox-label";
-
-      const cb = document.createElement("input");
-      cb.type  = "checkbox";
-      cb.value = m.key;
-      cb.checked = true;
-      cb.style.accentColor = m.color;
-      cb.addEventListener("change", () => {
-        if (cb.checked) activeKeys.add(m.key);
-        else            activeKeys.delete(m.key);
-        draw();
-      });
-
-      label.appendChild(cb);
-      label.appendChild(document.createTextNode(" " + m.label));
-      wrap.appendChild(label);
-    });
-  }
 
   function draw() {
     const wrap = document.querySelector("[data-chart='kroos-multiline']");
@@ -85,8 +59,8 @@ const KroosMultilineChart = (() => {
 
   function drawMultiline(wrap, data) {
     const W  = wrap.clientWidth  || 460;
-    const H  = wrap.clientHeight || 220;
-    const m  = { top: 20, right: 24, bottom: 52, left: 36 };
+    const H  = (wrap.clientHeight > 60 ? wrap.clientHeight : 280);
+    const m  = { top: 20, right: 24, bottom: 44, left: 40 };
     const iw = W - m.left - m.right;
     const ih = H - m.top  - m.bottom;
 
@@ -222,24 +196,6 @@ const KroosMultilineChart = (() => {
       .attr("font-size",   "9px")
       .attr("font-family", css("--font-ui"));
 
-    // Inline legend at bottom
-    const legendG = svg.append("g")
-      .attr("transform", `translate(${m.left}, ${H - 12})`);
-
-    let lx = 0;
-    active.forEach(met => {
-      legendG.append("circle")
-        .attr("cx", lx + 5).attr("cy", 0).attr("r", 4)
-        .attr("fill", met.color);
-      legendG.append("text")
-        .attr("x",               lx + 13)
-        .attr("dominant-baseline", "middle")
-        .attr("fill",            css("--text-muted"))
-        .attr("font-size",       "9px")
-        .attr("font-family",     css("--font-ui"))
-        .text(met.label);
-      lx += met.label.length * 5.8 + 22;
-    });
   }
 
   function drawSingleSeason(wrap, d) {

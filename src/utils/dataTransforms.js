@@ -37,10 +37,10 @@ const DataTransforms = (() => {
     4: "Wide Player",
   };
   const CLUSTER_COLORS = {
-    0: "#60a5fa",
+    0: "#f87171",
     1: "#4ade80",
     2: "#f0c060",
-    3: "#f87171",
+    3: "#60a5fa",
     4: "#c084fc",
   };
 

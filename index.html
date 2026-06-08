@@ -238,15 +238,6 @@
             />
             <ul class="scatter-search-dropdown" id="scatter-search-dropdown" hidden></ul>
           </div>
-          <select class="control-select" id="ctrl-03a-season">
-            <option value="all">All seasons</option>
-          </select>
-          <select class="control-select" id="ctrl-03a-color">
-            <option value="cluster">Color: Cluster</option>
-            <option value="league">Color: League</option>
-            <option value="goals_per90">Color: Goals / 90</option>
-            <option value="assists_per90">Color: Assists / 90</option>
-          </select>
           <button class="control-btn" id="ctrl-03a-reset">Reset zoom</button>
         </div>
       </div>
@@ -305,9 +296,7 @@
       <div class="chart-card" id="chart-04a">
         <div class="chart-card__header">
           <h3 class="chart-card__title">Kroos &mdash; season by season evolution</h3>
-          <div class="chart-card__controls">
-            <div class="metric-checkboxes" id="ctrl-04a-metrics"></div>
-          </div>
+          <div class="chart-card__controls"></div>
         </div>
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="kroos-multiline">
@@ -377,7 +366,18 @@
       <div class="chart-card" id="chart-05a">
         <div class="chart-card__header">
           <h3 class="chart-card__title">Top 10 potential successors</h3>
-          <div class="chart-card__controls"></div>
+          <div class="chart-card__controls">
+            <label class="control-label" for="ctrl-05a-maxage">Max age</label>
+            <select class="control-select" id="ctrl-05a-maxage">
+              <option value="99">Any age</option>
+              <option value="35">≤ 35</option>
+              <option value="30">≤ 30</option>
+              <option value="27">≤ 27</option>
+              <option value="25">≤ 25</option>
+              <option value="22">≤ 22</option>
+              <option value="19">≤ 19</option>
+            </select>
+          </div>
         </div>
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="successor-ranking">
@@ -411,11 +411,11 @@
       <h2 class="footer-title">Findings</h2>
       <div class="conclusions-grid" id="conclusions-grid">
         <div class="conclusion-card conclusion-card--placeholder">
-          TODO.
+          Findings will appear here once data is loaded.
         </div>
       </div>
       <p class="footer-credit">
-        Data: FBref/Understat via soccerdata library and Kaggle &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
+        Data: FBref via Kaggle &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
         Visualization: D3.js &middot; Analysis: Python (pandas, scikit-learn)
       </p>
     </div>

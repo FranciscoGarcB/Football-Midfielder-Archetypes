@@ -18,6 +18,9 @@ const SuccessorRankingChart = (() => {
 
     AppState.on("filters:changed", () => redraw());
 
+    document.getElementById("ctrl-05a-maxage")
+      ?.addEventListener("change", () => redraw());
+
     const observer = new MutationObserver(() => {
       const data = AppState.get("rawData");
       if (data) draw(data);
@@ -38,10 +41,13 @@ const SuccessorRankingChart = (() => {
 
     const latest = DataTransforms.latestSeasonPerPlayer(filtered);
 
+    const maxAge = +(document.getElementById("ctrl-05a-maxage")?.value || 99);
+
     const candidates = latest.filter(d =>
       d.name !== "Toni Kroos" &&
       d.similarity_to_kroos != null &&
-      isFinite(+d.similarity_to_kroos)
+      isFinite(+d.similarity_to_kroos) &&
+      (!d.age || +d.age <= maxAge)
     );
 
     return candidates
@@ -117,6 +123,10 @@ const SuccessorRankingChart = (() => {
           tooltip.classed("visible", true)
             .html(`
               <div class="tooltip-name">${d.name}</div>
+              <div class="tooltip-row">
+                <span>Age</span>
+                <span class="tooltip-val">${d.age || "—"}</span>
+              </div>
               <div class="tooltip-row">
                 <span>League</span>
                 <span class="tooltip-val">${d.league}</span>
