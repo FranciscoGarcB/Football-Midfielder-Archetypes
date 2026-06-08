@@ -75,6 +75,8 @@ const DataLoader = (() => {
       cluster:             +d.cluster,
       pc1:                 +d.pc1,
       pc2:                 +d.pc2,
+      pc3:                 +d.pc3 || 0,
+      pc4:                 +d.pc4 || 0,
       similarity_to_kroos: d.similarity_to_kroos ? +d.similarity_to_kroos : null,
     };
   }

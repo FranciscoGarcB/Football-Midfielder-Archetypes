@@ -64,7 +64,7 @@
   <section class="hero" id="hero">
     <div class="hero-content">
       <p class="hero-eyebrow">Top 5 European Leagues &middot; 2017&ndash;2025</p>
-      <h1 class="hero-title">Midfielder<em>Player Archetypes</em></h1>
+      <h1 class="hero-title">Player<em>Archetypes</em></h1>
       <p class="hero-sub">
         In June 2024, Toni Kroos retired. Real Madrid went on to win no major
         trophy in either of the two following seasons &mdash; an outcome almost
@@ -123,8 +123,10 @@
           <h3 class="chart-card__title">Kroos stats by season</h3>
           <div class="chart-card__controls">
             <select class="control-select" id="ctrl-01b-metric">
+              <option value="progressive_passes_per90">Prog. passes / 90</option>
               <option value="xa_per90">xA / 90</option>
-              <option value="key_passes_per90">Key passes / 90</option>
+              <option value="long_pass_pct">Long pass %</option>
+              <option value="gca_per90">GCA / 90</option>
               <option value="np_xg_per90">npxG / 90</option>
               <option value="goals_per90">Goals / 90</option>
               <option value="assists_per90">Assists / 90</option>
@@ -180,8 +182,11 @@
           <h3 class="chart-card__title">Metric comparison</h3>
           <div class="chart-card__controls">
             <select class="control-select" id="ctrl-02b-metric">
-              <option value="xa_per90">xA / 90</option>
+              <option value="progressive_passes_per90">Prog. passes / 90</option>
               <option value="key_passes_per90">Key passes / 90</option>
+              <option value="xa_per90">xA / 90</option>
+              <option value="long_pass_pct">Long pass %</option>
+              <option value="gca_per90">GCA / 90</option>
               <option value="np_xg_per90">npxG / 90</option>
               <option value="goals_per90">Goals / 90</option>
               <option value="tackles">Tackles / 90</option>
@@ -367,50 +372,17 @@
       </div>
     </div>
 
-    <div class="weight-panel" id="weight-panel">
-      <h4 class="weight-panel__title">Adjust the importance of each dimension</h4>
-      <div class="weight-sliders" id="weight-sliders">
-        <div class="weight-slider-group">
-          <label class="weight-label" for="w-passing">Passing &amp; creativity</label>
-          <input type="range" class="weight-slider" id="w-passing"
-                 min="0" max="10" step="1" value="5" />
-          <span class="weight-value" id="w-passing-val">5</span>
-        </div>
-        <div class="weight-slider-group">
-          <label class="weight-label" for="w-defense">Defense</label>
-          <input type="range" class="weight-slider" id="w-defense"
-                 min="0" max="10" step="1" value="3" />
-          <span class="weight-value" id="w-defense-val">3</span>
-        </div>
-        <div class="weight-slider-group">
-          <label class="weight-label" for="w-attack">Attack / xG</label>
-          <input type="range" class="weight-slider" id="w-attack"
-                 min="0" max="10" step="1" value="2" />
-          <span class="weight-value" id="w-attack-val">2</span>
-        </div>
-      </div>
-    </div>
-
     <div class="chart-grid chart-grid--2col">
 
       <div class="chart-card" id="chart-05a">
         <div class="chart-card__header">
           <h3 class="chart-card__title">Top 10 potential successors</h3>
-          <div class="chart-card__controls">
-            <select class="control-select" id="ctrl-05a-league">
-              <option value="all">All leagues</option>
-              <option value="Premier League">Premier League</option>
-              <option value="La Liga">La Liga</option>
-              <option value="Serie A">Serie A</option>
-              <option value="Bundesliga">Bundesliga</option>
-              <option value="Ligue 1">Ligue 1</option>
-            </select>
-          </div>
+          <div class="chart-card__controls"></div>
         </div>
         <div class="chart-card__body">
           <div class="chart-placeholder" data-chart="successor-ranking">
             <span class="placeholder-label">Lollipop ranking chart</span>
-            <span class="placeholder-type">D3 &middot; top 10 by distance to Kroos centroid &middot; reorders with weight sliders &middot; click to compare</span>
+            <span class="placeholder-type">D3 &middot; top 10 by similarity to Kroos &middot; responds to global league, season and minutes filters &middot; click to compare</span>
           </div>
         </div>
       </div>
@@ -443,7 +415,7 @@
         </div>
       </div>
       <p class="footer-credit">
-        Data: FBref via soccerdata library &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
+        Data: FBref/Understat via soccerdata library and Kaggle &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
         Visualization: D3.js &middot; Analysis: Python (pandas, scikit-learn)
       </p>
     </div>

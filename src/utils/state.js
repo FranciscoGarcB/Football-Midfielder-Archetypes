@@ -23,7 +23,7 @@ const AppState = (() => {
     scatterColorBy: "cluster",
     kroosYear:  2017,
     kroosPlaying: false,
-    weights: { passing: 5, defense: 3, attack: 2 },
+    weights: { passing: 5, defense: 5, attack: 5 },
     successorLeague: "all",
   };
 

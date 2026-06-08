@@ -43,7 +43,7 @@ KROOS_PRIME_START = "2019-20"
 KROOS_PRIME_END   = "2022-23"
 MIN_MINUTES       = 900
 N_CLUSTERS        = 5
-PCA_COMPONENTS    = 2
+PCA_COMPONENTS    = 4
 RANDOM_SEED       = 42
 
 VALID_LEAGUES = {
@@ -483,9 +483,9 @@ def clean(df: pd.DataFrame) -> pd.DataFrame:
 def run_pca_and_clustering(df: pd.DataFrame):
     df_active = df[df["minutes"] >= MIN_MINUTES].copy()
 
-    # Restrict PCA to players that have all player_data columns populated.
-    # This ensures pass_completion_pct, progressive_passes_per90 and
-    # key_passes_per90 are real values, not zeros from unmatched joins.
+    # Restrict PCA fitting to players that have all player_data columns populated.
+    # This ensures pass_completion_pct, progressive_passes_per90, etc. are real
+    # values and not zeros from unmatched joins.
     pd_cols = [
         "progressive_passes_per90", "key_passes_per90", "pass_completion_pct",
         "long_pass_pct", "gca_per90", "prog_carries_per90", "carries_final_third_per90",
@@ -494,51 +494,119 @@ def run_pca_and_clustering(df: pd.DataFrame):
     n_with    = has_pd.sum()
     n_without = (~has_pd).sum()
     print(f"  PCA subset: {n_with} players with full features, "
-          f"{n_without} excluded (no player_data match)")
+          f"{n_without} excluded from scatter (no player_data match)")
 
     df_pca = df_active[has_pd].copy()
 
     for c in FEATURE_COLS:
+        if c not in df_active.columns:
+            df_active[c] = 0.0
         if c not in df_pca.columns:
             df_pca[c] = 0.0
 
-    X = df_pca[FEATURE_COLS].fillna(0).values
-    scaler   = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
+    # Fit scaler and PCA on the full-feature subset
+    X_pca = df_pca[FEATURE_COLS].fillna(0).values
+    scaler = StandardScaler()
+    X_pca_scaled = scaler.fit_transform(X_pca)
 
     pca    = PCA(n_components=PCA_COMPONENTS, random_state=RANDOM_SEED)
-    coords = pca.fit_transform(X_scaled)
-    df_pca["pc1"] = coords[:, 0].round(4)
-    df_pca["pc2"] = coords[:, 1].round(4)
+    coords = pca.fit_transform(X_pca_scaled)
+
+    for i in range(PCA_COMPONENTS):
+        df_pca[f"pc{i+1}"] = coords[:, i].round(4)
 
     kmeans = KMeans(n_clusters=N_CLUSTERS, random_state=RANDOM_SEED, n_init=12)
-    df_pca["cluster"] = kmeans.fit_predict(X_scaled)
+    df_pca["cluster"] = kmeans.fit_predict(coords)
 
     variance = pca.explained_variance_ratio_.tolist()
-    print(f"  PCA variance explained: PC1={variance[0]:.3f}, PC2={variance[1]:.3f}")
+    cumvar   = sum(variance)
+    print(f"  PCA variance explained: " +
+          " ".join(f"PC{i+1}={v:.3f}" for i,v in enumerate(variance)) +
+          f"  (cumulative: {cumvar:.3f})")
 
-    kroos_mask = (
+    # Build Kroos centroid in PCA space from prime seasons
+    kroos_mask_pca = (
         (df_pca["player"] == KROOS_NAME) &
         (df_pca["season"] >= KROOS_PRIME_START) &
         (df_pca["season"] <= KROOS_PRIME_END)
     )
-    kroos_prime = df_pca[kroos_mask]
+    kroos_prime = df_pca[kroos_mask_pca]
 
     if kroos_prime.empty:
         print(f"  Warning: Kroos not found in PCA subset for "
-              f"{KROOS_PRIME_START}–{KROOS_PRIME_END}.")
-        df_pca["similarity_to_kroos"] = 0.0
+              f"{KROOS_PRIME_START}–{KROOS_PRIME_END}. "
+              f"Using feature-space centroid instead.")
+        # Fall back: build centroid in raw feature space from all Kroos rows
+        kroos_all = df_active[df_active["player"] == KROOS_NAME]
+        if kroos_all.empty:
+            df_pca["similarity_to_kroos"] = 0.0
+            kroos_centroid_pca = None
+        else:
+            kroos_feat = scaler.transform(kroos_all[FEATURE_COLS].fillna(0).values)
+            kroos_centroid_pca = pca.transform(kroos_feat).mean(axis=0)
     else:
-        centroid  = scaler.transform(
-            [kroos_prime[FEATURE_COLS].fillna(0).mean().values]
-        )[0]
-        distances = np.linalg.norm(X_scaled - centroid, axis=1)
-        df_pca["similarity_to_kroos"] = (
-            1 - distances / (distances.max() or 1)
-        ).round(4)
+        pc_cols = [f"pc{i+1}" for i in range(PCA_COMPONENTS)]
+        kroos_centroid_pca = kroos_prime[pc_cols].mean().values
 
-    pca_cols = ["player_id", "pc1", "pc2", "cluster", "similarity_to_kroos"]
+    # Features always available regardless of player_data match.
+    # Used to compute similarity for players missing the player_data columns.
+    CORE_FEATURE_COLS = [
+        "goals_per90", "assists_per90", "np_xg_per90", "xa_per90",
+        "shots_per90", "tackles_won", "interceptions",
+    ]
+
+    if kroos_centroid_pca is not None:
+        # Similarity for full-feature players (in PCA space, all 4 components)
+        distances = np.linalg.norm(coords - kroos_centroid_pca, axis=1)
+        max_dist  = distances.max() or 1
+        df_pca["similarity_to_kroos"] = (1 - distances / max_dist).round(4)
+
+        # Similarity for players WITHOUT player_data: compute in the sub-space
+        # of core features only, using a separate scaler fitted on the same
+        # full-feature subset (so the scale is consistent).
+        core_scaler = StandardScaler()
+        X_core_pca = df_pca[CORE_FEATURE_COLS].fillna(0).values
+        core_scaler.fit(X_core_pca)
+
+        # Kroos centroid in core feature space
+        kroos_core = df_pca[df_pca["player"] == KROOS_NAME][CORE_FEATURE_COLS].fillna(0).values
+        if len(kroos_core):
+            kroos_core_centroid = core_scaler.transform(kroos_core).mean(axis=0)
+        else:
+            # Fall back: use all Kroos rows in df_active
+            kroos_all_core = df_active[df_active["player"] == KROOS_NAME][CORE_FEATURE_COLS].fillna(0).values
+            kroos_core_centroid = core_scaler.transform(kroos_all_core).mean(axis=0) if len(kroos_all_core) else np.zeros(len(CORE_FEATURE_COLS))
+
+        # Max distance in core space (calibrated on full-feature players so scale matches)
+        X_core_all_pca = core_scaler.transform(df_pca[CORE_FEATURE_COLS].fillna(0).values)
+        core_dists_pca  = np.linalg.norm(X_core_all_pca - kroos_core_centroid, axis=1)
+        core_max_dist   = core_dists_pca.max() or 1
+
+        # Now compute for players without player_data
+        no_pd_mask = ~has_pd
+        if no_pd_mask.sum() > 0:
+            df_no_pd = df_active[no_pd_mask].copy()
+            X_core_no_pd = core_scaler.transform(df_no_pd[CORE_FEATURE_COLS].fillna(0).values)
+            dists_no_pd  = np.linalg.norm(X_core_no_pd - kroos_core_centroid, axis=1)
+            df_no_pd["similarity_to_kroos"] = (1 - dists_no_pd / core_max_dist).round(4).clip(0, 1)
+
+            # Combine: full-feature players from df_pca, rest from df_no_pd
+            sim_full  = df_pca[["player_id", "similarity_to_kroos"]]
+            sim_nopd  = df_no_pd[["player_id", "similarity_to_kroos"]]
+            sim_all   = pd.concat([sim_full, sim_nopd], ignore_index=True)
+        else:
+            sim_all = df_pca[["player_id", "similarity_to_kroos"]]
+
+        df_active = df_active.merge(sim_all, on="player_id", how="left")
+
+    # Merge PCA coords + cluster back (only full-feature players get pc1-pc4)
+    pca_cols = ["player_id", "pc1", "pc2", "pc3", "pc4", "cluster"]
     df = df.merge(df_pca[pca_cols], on="player_id", how="left")
+
+    # Merge similarity for ALL players (including those without player_data)
+    sim_cols = ["player_id", "similarity_to_kroos"]
+    df = df.merge(df_active[sim_cols], on="player_id", how="left")
+
     return df, variance
 
 
@@ -559,7 +627,7 @@ def build_players_csv(df: pd.DataFrame) -> pd.DataFrame:
         # Understat
         "xa_per90", "np_xg_per90", "xg_chain", "xg_buildup",
         # PCA + clustering
-        "cluster", "pc1", "pc2", "similarity_to_kroos",
+        "cluster", "pc1", "pc2", "pc3", "pc4", "similarity_to_kroos",
     ]
     cols = [c for c in cols if c in df.columns]
     out  = df[cols].sort_values(["season", "player"])
@@ -592,6 +660,8 @@ def build_pca_json(df: pd.DataFrame, variance: list) -> dict:
             "cluster":             int(row["cluster"]),
             "pc1":                 round(float(row["pc1"]), 4),
             "pc2":                 round(float(row["pc2"]), 4),
+            "pc3":                 round(float(row["pc3"]), 4) if pd.notna(row.get("pc3")) else None,
+            "pc4":                 round(float(row["pc4"]), 4) if pd.notna(row.get("pc4")) else None,
             "similarity_to_kroos": round(float(row["similarity_to_kroos"]), 4),
             # FBref standard + shooting + misc
             "goals_per90":              g("goals_per90"),
@@ -669,6 +739,8 @@ def build_kroos_json(df: pd.DataFrame) -> dict:
             "cluster":    int(row["cluster"]) if pd.notna(row.get("cluster")) else None,
             "pc1":        round(float(row["pc1"]), 4) if pd.notna(row.get("pc1")) else None,
             "pc2":        round(float(row["pc2"]), 4) if pd.notna(row.get("pc2")) else None,
+            "pc3":        round(float(row["pc3"]), 4) if pd.notna(row.get("pc3")) else None,
+            "pc4":        round(float(row["pc4"]), 4) if pd.notna(row.get("pc4")) else None,
         })
     return {"kroos": records}
 
@@ -692,7 +764,7 @@ def print_cluster_profiles(df: pd.DataFrame) -> None:
 
     print()
     print("=" * 70)
-    print("CLUSTER PROFILES — use to assign names in dataTransforms.js")
+    print("CLUSTER PROFILES")
     print("=" * 70)
 
     for cid in range(N_CLUSTERS):

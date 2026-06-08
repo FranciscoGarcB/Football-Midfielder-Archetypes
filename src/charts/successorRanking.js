@@ -1,7 +1,6 @@
 // Section 05 - Chart A
 // Lollipop chart ranking the top 10 midfielders by similarity to Kroos.
-// Uses similarity_to_kroos pre-computed by process_data.py when weights
-// are equal, and recomputes a weighted distance when sliders change.
+// Responds to global filters: league, season, and minimum minutes.
 // Clicking a row emits "successor:selected" to drive ComparisonRadarChart.
 
 const SuccessorRankingChart = (() => {
@@ -13,23 +12,11 @@ const SuccessorRankingChart = (() => {
   }
 
   function init() {
-    AppState.on("data:ready", ({ players }) => requestAnimationFrame(() => requestAnimationFrame(() => draw(players))));
-    AppState.on("weights:changed", () => redraw());
+    AppState.on("data:ready", ({ players }) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => draw(players)))
+    );
 
-    ["passing", "defense", "attack"].forEach(dim => {
-      const slider = document.getElementById(`w-${dim}`);
-      const valEl  = document.getElementById(`w-${dim}-val`);
-      slider?.addEventListener("input", e => {
-        if (valEl) valEl.textContent = e.target.value;
-        AppState.set(`weights.${dim}`, +e.target.value);
-        AppState.emit("weights:changed");
-      });
-    });
-
-    document.getElementById("ctrl-05a-league")?.addEventListener("change", e => {
-      AppState.set("successorLeague", e.target.value);
-      redraw();
-    });
+    AppState.on("filters:changed", () => redraw());
 
     const observer = new MutationObserver(() => {
       const data = AppState.get("rawData");
@@ -46,50 +33,21 @@ const SuccessorRankingChart = (() => {
   }
 
   function rankPlayers(data) {
-    const weights      = AppState.get("weights")  || { passing: 5, defense: 3, attack: 2 };
-    const leagueFilter = AppState.get("successorLeague") || "all";
-    const latest       = DataTransforms.latestSeasonPerPlayer(data);
+    // Apply the same global filters as every other chart
+    const filtered = DataTransforms.applyFilters(data);
 
-    let candidates = latest.filter(d =>
-      d.name !== "Toni Kroos" && d.minutes >= 900
+    const latest = DataTransforms.latestSeasonPerPlayer(filtered);
+
+    const candidates = latest.filter(d =>
+      d.name !== "Toni Kroos" &&
+      d.similarity_to_kroos != null &&
+      isFinite(+d.similarity_to_kroos)
     );
 
-    if (leagueFilter !== "all") {
-      candidates = candidates.filter(d => d.league === leagueFilter);
-    }
-
-    const wTotal = (weights.passing + weights.defense + weights.attack) || 1;
-
-    // Kroos centroid from all available seasons
-    const kroosRows = data.filter(d => d.name === "Toni Kroos");
-
-    if (!kroosRows.length) {
-      // Fall back to pre-computed similarity_to_kroos
-      return candidates
-        .filter(d => d.similarity_to_kroos != null)
-        .map(d => ({ ...d, score: +d.similarity_to_kroos }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 10);
-    }
-
-    const centroid = {};
-    DataTransforms.RADAR_AXES.forEach(ax => {
-      centroid[ax.key] = d3.mean(kroosRows, d => d[ax.key] || 0) || 0;
-    });
-
-    const scored = candidates.map(d => {
-      const dp = DataTransforms.euclidean(d, centroid, DataTransforms.FEATURE_GROUPS.passing);
-      const dd = DataTransforms.euclidean(d, centroid, DataTransforms.FEATURE_GROUPS.defense);
-      const da = DataTransforms.euclidean(d, centroid, DataTransforms.FEATURE_GROUPS.attack);
-      const dist = (weights.passing * dp + weights.defense * dd + weights.attack * da) / wTotal;
-      return { ...d, dist };
-    });
-
-    const maxDist = d3.max(scored, d => d.dist) || 1;
-    return scored
-      .map(d => ({ ...d, score: 1 - d.dist / maxDist }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
+    return candidates
+      .sort((a, b) => b.similarity_to_kroos - a.similarity_to_kroos)
+      .slice(0, 10)
+      .map(d => ({ ...d, score: +d.similarity_to_kroos }));
   }
 
   function draw(data) {
@@ -97,7 +55,14 @@ const SuccessorRankingChart = (() => {
     if (!wrap) return;
 
     const ranked = rankPlayers(data);
-    if (!ranked.length) return;
+    if (!ranked.length) {
+      wrap.innerHTML = "";
+      const p = document.createElement("p");
+      p.textContent = "No players match the current filters.";
+      p.style.cssText = "color:var(--text-muted);font-size:0.8rem;padding:1rem;font-family:var(--font-ui)";
+      wrap.appendChild(p);
+      return;
+    }
 
     wrap.innerHTML = "";
 
@@ -107,9 +72,7 @@ const SuccessorRankingChart = (() => {
     const iw     = W - m.left - m.right;
     const ih     = H - m.top  - m.bottom;
 
-    const xScale = d3.scaleLinear()
-      .domain([0, 1])
-      .range([0, iw]);
+    const xScale = d3.scaleLinear().domain([0, 1]).range([0, iw]);
 
     const yScale = d3.scaleBand()
       .domain(ranked.map(d => d.name))
@@ -136,12 +99,12 @@ const SuccessorRankingChart = (() => {
     const tooltip = d3.select("body").select(".d3-tooltip");
 
     ranked.forEach((d, i) => {
-      const color   = DataTransforms.CLUSTER_COLORS[d.cluster] || "#888";
-      const cy      = yScale(d.name) + yScale.bandwidth() / 2;
-      const targetX = xScale(d.score);
+      const color      = DataTransforms.CLUSTER_COLORS[d.cluster] || "#888";
+      const cy         = yScale(d.name) + yScale.bandwidth() / 2;
+      const targetX    = xScale(d.score);
       const isSelected = d.id === selectedId;
 
-      // Invisible hit area for the full row
+      // Hit area for the full row
       g.append("rect")
         .attr("x",       -m.left)
         .attr("y",       yScale(d.name))
@@ -187,10 +150,8 @@ const SuccessorRankingChart = (() => {
 
       // Stem
       g.append("line")
-        .attr("x1",           0)
-        .attr("x2",           0)
-        .attr("y1",           cy)
-        .attr("y2",           cy)
+        .attr("x1", 0).attr("x2", 0)
+        .attr("y1", cy).attr("y2", cy)
         .attr("stroke",       isSelected ? css("--text-primary") : color)
         .attr("stroke-width", isSelected ? 2 : 1.5)
         .attr("opacity",      0.7)
@@ -199,8 +160,7 @@ const SuccessorRankingChart = (() => {
 
       // Head dot
       g.append("circle")
-        .attr("cx",           0)
-        .attr("cy",           cy)
+        .attr("cx", 0).attr("cy", cy)
         .attr("r",            isSelected ? 7 : 5)
         .attr("fill",         color)
         .attr("stroke",       isSelected ? css("--text-primary") : "none")
@@ -210,18 +170,17 @@ const SuccessorRankingChart = (() => {
 
       // Score label
       g.append("text")
-        .attr("x",               targetX + 7)
-        .attr("y",               cy)
-        .attr("dominant-baseline","middle")
-        .attr("fill",            css("--text-muted"))
-        .attr("font-size",       "9px")
-        .attr("font-family",     css("--font-ui"))
-        .attr("opacity",         0)
+        .attr("x", targetX + 7).attr("y", cy)
+        .attr("dominant-baseline", "middle")
+        .attr("fill",        css("--text-muted"))
+        .attr("font-size",   "9px")
+        .attr("font-family", css("--font-ui"))
+        .attr("opacity",     0)
         .text(`${(d.score * 100).toFixed(0)}%`)
         .transition().delay(520).attr("opacity", 1);
     });
 
-    // Player name labels (y axis)
+    // Player name labels
     ranked.forEach(d => {
       const isSelected = d.id === selectedId;
       g.append("text")
@@ -250,8 +209,7 @@ const SuccessorRankingChart = (() => {
       .attr("font-family", css("--font-ui"));
 
     g.append("text")
-      .attr("x",           iw / 2)
-      .attr("y",           ih + 28)
+      .attr("x", iw / 2).attr("y", ih + 28)
       .attr("text-anchor", "middle")
       .attr("fill",        css("--text-muted"))
       .attr("font-size",   "9px")
