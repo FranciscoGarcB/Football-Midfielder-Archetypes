@@ -1,8 +1,7 @@
 // Section 04 - Chart B
-// Radar comparing Kroos's profile against the La Liga top-10% average.
-// Season: taken from the global header filter. When set to "all", uses
-// the last season Kroos appears in the dataset.
-// Reuses RadarLeaguesChart.drawRadarSVG().
+// Radar comparing Kroos's average profile (across all available seasons)
+// against the La Liga top-10% average across the same seasons.
+// Not affected by any header filter — uses all Kroos data always.
 
 const KroosVsLeagueRadarChart = (() => {
 
@@ -15,11 +14,6 @@ const KroosVsLeagueRadarChart = (() => {
       requestAnimationFrame(() => draw(players))
     );
 
-    AppState.on("filters:changed", () => {
-      const players = AppState.get("rawData");
-      if (players) draw(players);
-    });
-
     const observer = new MutationObserver(() => {
       const players = AppState.get("rawData");
       if (players) draw(players);
@@ -29,81 +23,68 @@ const KroosVsLeagueRadarChart = (() => {
     });
   }
 
-  function resolveSeason(players) {
-    const f = AppState.get("filters");
-    if (f.season !== "all") return f.season;
-    // Fall back to the last season Kroos appears in
-    const kroosSeason = DataTransforms.kroosRows(players).map(d => d.season);
-    return kroosSeason[kroosSeason.length - 1] || null;
-  }
-
   function draw(players) {
     const wrap = document.querySelector("[data-chart='kroos-vs-league-radar']");
     if (!wrap) return;
 
-    const season = resolveSeason(players);
-    if (!season) {
-      wrap.innerHTML = "";
+    const kroosRows = DataTransforms.kroosRows(players);
+    if (!kroosRows.length) {
       showEmpty(wrap, "No Kroos data available");
       return;
     }
 
-    // Always look up Kroos across all raw data (not filtered by league)
-    const kroosRow = players.find(d => d.name === "Toni Kroos" && d.season === season);
-    if (!kroosRow) {
-      wrap.innerHTML = "";
-      showEmpty(wrap, `No Kroos data for ${season}`);
-      return;
-    }
+    const seasons = kroosRows.map(d => d.season);
 
-    // La Liga top-10% for the same season, excluding Kroos
+    // La Liga midfielders across the same seasons Kroos played, excluding Kroos
     const leaguePlayers = players.filter(d =>
       d.league  === "La Liga" &&
-      d.season  === season    &&
-      d.minutes >= 900        &&
+      seasons.includes(d.season) &&
+      d.minutes >= 900 &&
       d.name    !== "Toni Kroos"
     );
 
     if (!leaguePlayers.length) {
-      wrap.innerHTML = "";
-      showEmpty(wrap, `No La Liga data for ${season}`);
+      showEmpty(wrap, "No La Liga data available");
       return;
     }
 
     const axes = DataTransforms.RADAR_AXES;
 
+    // Kroos mean across all his seasons
+    const kroosMean = {};
+    axes.forEach(ax => {
+      kroosMean[ax.key] = d3.mean(kroosRows, d => d[ax.key] ?? 0) || 0;
+    });
+
+    // La Liga mean across those same seasons
     const leagueMean = {};
     axes.forEach(ax => {
-      leagueMean[ax.key] = d3.mean(leaguePlayers, d => d[ax.key]) ?? 0;
+      leagueMean[ax.key] = d3.mean(leaguePlayers, d => d[ax.key] ?? 0) || 0;
     });
 
-    // Normalize both relative to each axis max (Kroos vs league mean)
+    // Normalize both relative to each axis max
     const maxPerAxis = {};
     axes.forEach(ax => {
-      maxPerAxis[ax.key] = Math.max(kroosRow[ax.key] || 0, leagueMean[ax.key] || 0) || 1;
+      maxPerAxis[ax.key] = Math.max(kroosMean[ax.key], leagueMean[ax.key]) || 1;
     });
 
-    const kroosProfile = { label: "Toni Kroos" };
+    const kroosProfile = { label: "Toni Kroos (avg)" };
     axes.forEach(ax => {
-      kroosProfile[ax.key] = Math.min(1, (kroosRow[ax.key] || 0) / maxPerAxis[ax.key]);
+      kroosProfile[ax.key] = Math.min(1, kroosMean[ax.key] / maxPerAxis[ax.key]);
     });
 
-    const leagueProfile = { label: `La Liga top 10% (${season})` };
+    const leagueProfile = { label: "La Liga top 10% (avg)" };
     axes.forEach(ax => {
-      leagueProfile[ax.key] = Math.min(1, (leagueMean[ax.key] || 0) / maxPerAxis[ax.key]);
+      leagueProfile[ax.key] = Math.min(1, leagueMean[ax.key] / maxPerAxis[ax.key]);
     });
 
-    const rawKroos  = { label: "Toni Kroos" };
-    const rawLeague = { label: `La Liga top 10% (${season})` };
-    axes.forEach(ax => {
-      rawKroos[ax.key]  = kroosRow[ax.key] || 0;
-      rawLeague[ax.key] = leagueMean[ax.key] || 0;
-    });
+    const rawKroos  = { label: "Toni Kroos (avg)",       ...kroosMean  };
+    const rawLeague = { label: "La Liga top 10% (avg)",  ...leagueMean };
 
     RadarLeaguesChart.drawRadarSVG(wrap, [kroosProfile, leagueProfile], {
       colors: {
-        "Toni Kroos":                css("--kroos-color"),
-        [`La Liga top 10% (${season})`]: css("--text-muted"),
+        "Toni Kroos (avg)":      css("--kroos-color"),
+        "La Liga top 10% (avg)": css("--text-muted"),
       },
       labelKey:    "label",
       size:        Math.min(wrap.clientWidth || 320, 340),

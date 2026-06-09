@@ -158,25 +158,24 @@ const SuccessorRankingChart = (() => {
         .attr("font-family",     css("--font-ui"))
         .text(i + 1);
 
-      // Stem
+      // Stem — pointer-events:none so rect handles all clicks
       g.append("line")
-        .attr("x1", 0).attr("x2", 0)
+        .attr("x1", 0).attr("x2", targetX)
         .attr("y1", cy).attr("y2", cy)
         .attr("stroke",       isSelected ? css("--text-primary") : color)
         .attr("stroke-width", isSelected ? 2 : 1.5)
         .attr("opacity",      0.7)
-        .transition().duration(500).ease(d3.easeCubicOut)
-        .attr("x2", targetX);
+        .style("pointer-events", "none");
 
       // Head dot
       g.append("circle")
-        .attr("cx", 0).attr("cy", cy)
+        .attr("cx",           targetX)
+        .attr("cy",           cy)
         .attr("r",            isSelected ? 7 : 5)
         .attr("fill",         color)
         .attr("stroke",       isSelected ? css("--text-primary") : "none")
         .attr("stroke-width", 2)
-        .transition().duration(500).ease(d3.easeCubicOut)
-        .attr("cx", targetX);
+        .style("pointer-events", "none");
 
       // Score label
       g.append("text")
@@ -185,9 +184,8 @@ const SuccessorRankingChart = (() => {
         .attr("fill",        css("--text-muted"))
         .attr("font-size",   "9px")
         .attr("font-family", css("--font-ui"))
-        .attr("opacity",     0)
-        .text(`${(d.score * 100).toFixed(0)}%`)
-        .transition().delay(520).attr("opacity", 1);
+        .style("pointer-events", "none")
+        .text(`${(d.score * 100).toFixed(0)}%`);
     });
 
     // Player name labels

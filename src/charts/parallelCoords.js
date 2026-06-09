@@ -18,7 +18,8 @@ const ParallelCoordsChart = (() => {
     { key: "interceptions",            label: "Interceptions"},
   ];
 
-  let selectedId = null;
+  let selectedId     = null;
+  let hiddenClusters = new Set();
 
   function css(v) {
     return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -55,9 +56,21 @@ const ParallelCoordsChart = (() => {
     if (!data.length) return;
 
     // Use latest season per player to avoid visual clutter from multi-season duplicates
-    const latest = DataTransforms.latestSeasonPerPlayer(data);
+    const latestFiltered = DataTransforms.latestSeasonPerPlayer(data);
+
+    // Always include Kroos even if his league is filtered out
+    const kroosAll = DataTransforms.latestSeasonPerPlayer(rawData)
+      .filter(d => d.name === "Toni Kroos");
+    const kroosIds = new Set(kroosAll.map(d => d.id));
+    const latest   = [
+      ...latestFiltered.filter(d => !kroosIds.has(d.id)),
+      ...kroosAll,
+    ];
 
     wrap.innerHTML = "";
+
+    // Build cluster legend above SVG
+    buildLegend(wrap);
 
     const W  = wrap.clientWidth  || 800;
     const H  = wrap.clientHeight || 360;
@@ -104,7 +117,11 @@ const ParallelCoordsChart = (() => {
 
     // Background: all players except Kroos and selected
     const kroosColor    = css("--kroos-color");
-    const bgPlayers     = latest.filter(d => d.name !== "Toni Kroos" && d.id !== selectedId);
+    const bgPlayers     = latest.filter(d =>
+      d.name !== "Toni Kroos" &&
+      d.id   !== selectedId   &&
+      !hiddenClusters.has(d.cluster)
+    );
     const selectedPlayer = latest.find(d => d.id === selectedId);
     const kroosPlayer    = latest.find(d => d.name === "Toni Kroos");
 
@@ -120,9 +137,9 @@ const ParallelCoordsChart = (() => {
         .attr("opacity",         selectedId ? 0.25 : 0.45)
         .on("mouseover", (event, d) => {
           d3.select(event.currentTarget)
-            .attr("stroke", DataTransforms.CLUSTER_COLORS[d.cluster] || "#888")
-            .attr("opacity", 1)
-            .raise();
+            .attr("stroke",       DataTransforms.CLUSTER_COLORS[d.cluster] || "#888")
+            .attr("stroke-width", 1.5)
+            .attr("opacity",      0.85);
           tooltip.classed("visible", true)
             .html(`
               <div class="tooltip-name">${d.name}</div>
@@ -135,10 +152,11 @@ const ParallelCoordsChart = (() => {
           tooltip.style("left", (event.clientX + 14) + "px")
                  .style("top",  (event.clientY - 32) + "px");
         })
-        .on("mouseout", (event, d) => {
+        .on("mouseout", (event) => {
           d3.select(event.currentTarget)
-            .attr("stroke",  css("--chart-grid-color"))
-            .attr("opacity", selectedId ? 0.25 : 0.45);
+            .attr("stroke",       css("--chart-grid-color"))
+            .attr("stroke-width", 1)
+            .attr("opacity",      selectedId ? 0.25 : 0.45);
           tooltip.classed("visible", false);
         });
 
@@ -232,31 +250,74 @@ const ParallelCoordsChart = (() => {
         .text("0");
     });
 
-    // Mini legend: background / Kroos / selected
-    const legendItems = [
-      { label: "All midfielders", color: css("--chart-grid-color"), width: 1.5, opacity: 0.6 },
-    ];
-    if (kroosPlayer)    legendItems.push({ label: "Toni Kroos", color: kroosColor, width: 2.5, opacity: 1 });
-    if (selectedPlayer) legendItems.push({ label: selectedPlayer.name, color: DataTransforms.CLUSTER_COLORS[selectedPlayer.cluster] || "#60a5fa", width: 2.5, opacity: 0.95 });
+    // Inline line legend at bottom: Kroos + selected
+    const lineItems = [];
+    if (kroosPlayer)    lineItems.push({ label: "Toni Kroos", color: kroosColor, w: 2.5 });
+    if (selectedPlayer) lineItems.push({ label: selectedPlayer.name, color: DataTransforms.CLUSTER_COLORS[selectedPlayer.cluster] || "#60a5fa", w: 2.5 });
 
-    let lx = 0;
-    const legG = svg.append("g").attr("transform", `translate(${m.left},${H - 4})`);
-    legendItems.forEach(item => {
-      legG.append("line")
-        .attr("x1", lx).attr("x2", lx + 18)
-        .attr("y1", 0).attr("y2", 0)
-        .attr("stroke",       item.color)
-        .attr("stroke-width", item.width)
-        .attr("opacity",      item.opacity);
-      legG.append("text")
-        .attr("x", lx + 22).attr("y", 0)
-        .attr("dominant-baseline", "middle")
-        .attr("fill",        css("--text-muted"))
-        .attr("font-size",   "9px")
-        .attr("font-family", css("--font-ui"))
-        .text(item.label);
-      lx += item.label.length * 6 + 34;
+    if (lineItems.length) {
+      let lx = 0;
+      const legG = svg.append("g").attr("transform", `translate(${m.left},${H - 4})`);
+      lineItems.forEach(item => {
+        legG.append("line")
+          .attr("x1", lx).attr("x2", lx + 18)
+          .attr("y1", 0).attr("y2", 0)
+          .attr("stroke", item.color).attr("stroke-width", item.w);
+        legG.append("text")
+          .attr("x", lx + 22).attr("y", 0)
+          .attr("dominant-baseline", "middle")
+          .attr("fill",        css("--text-muted"))
+          .attr("font-size",   "9px")
+          .attr("font-family", css("--font-ui"))
+          .text(item.label);
+        lx += item.label.length * 6.2 + 34;
+      });
+    }
+  }
+
+  function buildLegend(wrap) {
+    const div = document.createElement("div");
+    div.className = "pc-cluster-legend";
+    div.style.cssText = [
+      "display:flex", "flex-wrap:wrap", "gap:6px 14px",
+      "padding:6px 12px 4px", "font-family:var(--font-ui)",
+      "font-size:0.72rem",
+    ].join(";");
+
+    Object.entries(DataTransforms.CLUSTER_NAMES).forEach(([id, name]) => {
+      const cid   = +id;
+      const color = DataTransforms.CLUSTER_COLORS[cid] || "#888";
+      const item  = document.createElement("span");
+      item.style.cssText = "display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none";
+
+      const swatch = document.createElement("span");
+      swatch.style.cssText = `width:10px;height:10px;border-radius:50%;background:${color};flex-shrink:0;transition:opacity .15s`;
+
+      const label = document.createElement("span");
+      label.textContent = name;
+      label.style.color = "var(--text-secondary)";
+      label.style.transition = "opacity .15s";
+
+      const setActive = () => {
+        const hidden = hiddenClusters.has(cid);
+        swatch.style.opacity = hidden ? "0.25" : "1";
+        label.style.opacity  = hidden ? "0.35" : "1";
+      };
+      setActive();
+
+      item.addEventListener("click", () => {
+        if (hiddenClusters.has(cid)) hiddenClusters.delete(cid);
+        else hiddenClusters.add(cid);
+        setActive();
+        redraw();
+      });
+
+      item.appendChild(swatch);
+      item.appendChild(label);
+      div.appendChild(item);
     });
+
+    wrap.appendChild(div);
   }
 
   return { init };
