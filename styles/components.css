@@ -39,6 +39,11 @@
   flex-wrap: wrap;
 }
 
+.chart-card__body--tall {
+  min-height: 380px;
+  height: 380px;
+}
+
 .chart-card__body {
   padding: var(--space-lg);
   flex: 1;

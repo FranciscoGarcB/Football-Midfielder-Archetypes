@@ -29,7 +29,7 @@ const KroosSeasonChart = (() => {
   }
 
   function init() {
-    AppState.on("data:ready", () => draw());
+    AppState.on("data:ready", () => requestAnimationFrame(() => draw()));
 
     document.getElementById("ctrl-01b-metric")?.addEventListener("change", e => {
       currentMetric = e.target.value;

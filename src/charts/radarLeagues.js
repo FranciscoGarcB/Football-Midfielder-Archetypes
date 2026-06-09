@@ -13,7 +13,9 @@ const RadarLeaguesChart = (() => {
   }
 
   function init() {
-    AppState.on("data:ready", ({ players }) => draw(players));
+    AppState.on("data:ready", ({ players }) =>
+      requestAnimationFrame(() => draw(DataTransforms.applyFilters(players)))
+    );
     AppState.on("filters:changed", () => redraw());
     AppState.on("leagues:changed", () => redraw());
 
@@ -36,7 +38,7 @@ const RadarLeaguesChart = (() => {
     if (!wrap) return;
 
     const profiles = DataTransforms.leagueProfiles(data);
-    const normed   = DataTransforms.normalizeProfiles(profiles);
+    const normed   = DataTransforms.normalizeProfiles(profiles, data);
     const active   = AppState.get("activeLeagues");
     const visible  = normed.filter(p => active.has(p.league));
 
@@ -100,18 +102,8 @@ const RadarLeaguesChart = (() => {
         .attr("stroke-width", level === 1.0 ? 1.2 : 0.8);
     });
 
-    // Level value labels (0.25 → 0.5 → 0.75 → 1.0) on the first axis
-    LEVELS.forEach(level => {
-      const p = pt(level, 0);
-      svg.append("text")
-        .attr("x",               p.x + 5)
-        .attr("y",               p.y)
-        .attr("dominant-baseline", "middle")
-        .attr("fill",            css("--text-muted"))
-        .attr("font-size",       "8px")
-        .attr("font-family",     css("--font-ui"))
-        .text(level.toFixed(2));
-    });
+    // Ring labels removed — values are relative to p95 of the dataset.
+    // Raw values are shown in the tooltip on hover.
 
     // Axis spokes
     axes.forEach((ax, i) => {

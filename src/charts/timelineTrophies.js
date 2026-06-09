@@ -23,7 +23,7 @@ const TimelineTrophiesChart = (() => {
   }
 
   function init() {
-    AppState.on("data:ready", ({ trophies }) => draw(trophies));
+    AppState.on("data:ready", ({ trophies }) => requestAnimationFrame(() => draw(trophies)));
 
     // Redraw when theme changes so colors update
     const observer = new MutationObserver(() => {

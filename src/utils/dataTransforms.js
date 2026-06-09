@@ -78,15 +78,20 @@ const DataTransforms = (() => {
     return result;
   }
 
-  function normalizeProfiles(profiles) {
+  function normalizeProfiles(profiles, allPlayers) {
     const axes = RADAR_AXES.map(a => a.key);
-    const extents = {};
-    axes.forEach(k => { extents[k] = d3.extent(profiles, d => d[k]); });
+    // Use 95th percentile of all players per axis as the ceiling.
+    // This prevents a single outlier from compressing all league averages
+    // toward zero, while still giving outlier leagues a value > 1 (clamped).
+    const p95 = {};
+    axes.forEach(k => {
+      const vals = (allPlayers || profiles).map(d => d[k] ?? 0).sort(d3.ascending);
+      p95[k] = d3.quantile(vals, 0.95) || d3.max(vals) || 1;
+    });
     return profiles.map(p => {
       const norm = { league: p.league };
       axes.forEach(k => {
-        const [lo, hi] = extents[k];
-        norm[k] = (hi === lo) ? 0 : (p[k] - lo) / (hi - lo);
+        norm[k] = Math.min(1, Math.max(0, (p[k] ?? 0) / (p95[k] || 1)));
       });
       return norm;
     });
@@ -94,12 +99,14 @@ const DataTransforms = (() => {
 
   function normalizePlayerProfile(player, referenceRows) {
     const axes = RADAR_AXES.map(a => a.key);
-    const extents = {};
-    axes.forEach(k => { extents[k] = d3.extent(referenceRows, d => d[k]); });
+    const p95  = {};
+    axes.forEach(k => {
+      const vals = referenceRows.map(d => d[k] ?? 0).sort(d3.ascending);
+      p95[k] = d3.quantile(vals, 0.95) || d3.max(vals) || 1;
+    });
     const norm = { label: player.name };
     axes.forEach(k => {
-      const [lo, hi] = extents[k];
-      norm[k] = (hi === lo) ? 0 : Math.min(1, Math.max(0, (player[k] - lo) / (hi - lo)));
+      norm[k] = Math.min(1, Math.max(0, (player[k] ?? 0) / (p95[k] || 1)));
     });
     return norm;
   }

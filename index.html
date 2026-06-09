@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Player Archetypes in European Football</title>
+  <title>The Kroos Effect — Player Archetypes in European Football</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,7 +21,7 @@
 
   <header class="global-header" id="global-header">
     <div class="header-brand">
-      <span class="brand-title">Player Archetypes</span>
+      <span class="brand-title">The Kroos Effect</span>
     </div>
 
     <nav class="section-nav" id="section-nav">
@@ -64,7 +64,7 @@
   <section class="hero" id="hero">
     <div class="hero-content">
       <p class="hero-eyebrow">Top 5 European Leagues &middot; 2017&ndash;2025</p>
-      <h1 class="hero-title">Player<em>Archetypes</em></h1>
+      <h1 class="hero-title">The Kroos<em>Effect</em></h1>
       <p class="hero-sub">
         In June 2024, Toni Kroos retired. Real Madrid went on to win no major
         trophy in either of the two following seasons &mdash; an outcome almost
@@ -293,19 +293,6 @@
 
     <div class="chart-grid chart-grid--2col">
 
-      <div class="chart-card" id="chart-04a">
-        <div class="chart-card__header">
-          <h3 class="chart-card__title">Kroos &mdash; season by season evolution</h3>
-          <div class="chart-card__controls"></div>
-        </div>
-        <div class="chart-card__body">
-          <div class="chart-placeholder" data-chart="kroos-multiline">
-            <span class="placeholder-label">Multi-line chart</span>
-            <span class="placeholder-type">D3 &middot; normalized metrics &middot; animated draw-in &middot; retirement annotation</span>
-          </div>
-        </div>
-      </div>
-
       <div class="chart-card" id="chart-04b">
         <div class="chart-card__header">
           <h3 class="chart-card__title">Kroos vs. La Liga average</h3>
@@ -323,26 +310,27 @@
         </div>
       </div>
 
+      <div class="chart-card" id="chart-04c-wrap">
+        <div class="chart-card__header">
+          <h3 class="chart-card__title">Kroos&rsquo;s trajectory in the archetype space</h3>
+          <div class="chart-card__controls">
+            <button class="control-btn control-btn--play" id="ctrl-04c-play">Play</button>
+            <button class="control-btn" id="ctrl-04c-reset">Reset</button>
+            <input type="range" class="control-slider" id="ctrl-04c-year"
+                   min="2017" max="2023" step="1" value="2017" />
+            <span class="control-label" id="ctrl-04c-year-label">2017/18</span>
+          </div>
+        </div>
+        <div class="chart-card__body">
+          <div class="chart-placeholder" data-chart="kroos-pca-trajectory">
+            <span class="placeholder-label">Animated PCA trajectory</span>
+            <span class="placeholder-type">D3 &middot; background = all MF in gray &middot; amber path traces Kroos year by year</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="chart-card chart-card--full" id="chart-04c">
-      <div class="chart-card__header">
-        <h3 class="chart-card__title">Kroos&rsquo;s trajectory in the archetype space (2017&ndash;2023)</h3>
-        <div class="chart-card__controls">
-          <button class="control-btn control-btn--play" id="ctrl-04c-play">Play</button>
-          <button class="control-btn" id="ctrl-04c-reset">Reset</button>
-          <input type="range" class="control-slider" id="ctrl-04c-year"
-                 min="2017" max="2023" step="1" value="2017" />
-          <span class="control-label" id="ctrl-04c-year-label">2017/18</span>
-        </div>
-      </div>
-      <div class="chart-card__body">
-        <div class="chart-placeholder" data-chart="kroos-pca-trajectory">
-          <span class="placeholder-label">Animated PCA trajectory</span>
-          <span class="placeholder-type">D3 &middot; background = all MF in gray &middot; amber path + dot traces Kroos year by year &middot; play/pause button</span>
-        </div>
-      </div>
-    </div>
 
   </section>
 
@@ -374,8 +362,6 @@
               <option value="30">≤ 30</option>
               <option value="27">≤ 27</option>
               <option value="25">≤ 25</option>
-              <option value="22">≤ 22</option>
-              <option value="19">≤ 19</option>
             </select>
           </div>
         </div>
@@ -403,6 +389,22 @@
       </div>
 
     </div>
+
+    <div class="chart-card chart-card--full" id="chart-05c">
+      <div class="chart-card__header">
+        <h3 class="chart-card__title">Midfielder profiles &mdash; parallel coordinates</h3>
+        <div class="chart-card__controls">
+          <span class="control-label" id="ctrl-05c-hint">Select a player in the ranking to highlight</span>
+        </div>
+      </div>
+      <div class="chart-card__body chart-card__body--tall">
+        <div class="chart-placeholder" data-chart="parallel-coords">
+          <span class="placeholder-label">Parallel coordinates</span>
+          <span class="placeholder-type">D3 &middot; all filtered midfielders in gray &middot; Kroos in amber &middot; selected successor highlighted</span>
+        </div>
+      </div>
+    </div>
+
   </section>
 
 
@@ -415,7 +417,7 @@
         </div>
       </div>
       <p class="footer-credit">
-        Data: FBref & Understat via soccerdata library + player_data from Kaggle &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
+        Data: FBref via Kaggle &middot; Top 5 European Leagues 2017&ndash;2025 &middot;
         Visualization: D3.js &middot; Analysis: Python (pandas, scikit-learn)
       </p>
     </div>
@@ -437,11 +439,11 @@
   <script src="src/charts/radarLeagues.js"></script>
   <script src="src/charts/barLeagues.js"></script>
   <script src="src/charts/pcaScatter.js"></script>
-  <script src="src/charts/kroosMultiline.js"></script>
   <script src="src/charts/kroosVsLeagueRadar.js"></script>
   <script src="src/charts/kroosTrajectory.js"></script>
   <script src="src/charts/successorRanking.js"></script>
   <script src="src/charts/comparisonRadar.js"></script>
+  <script src="src/charts/parallelCoords.js"></script>
 
   <script src="src/app.js"></script>
 

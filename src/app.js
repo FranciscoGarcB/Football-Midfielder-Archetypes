@@ -26,10 +26,10 @@ document.addEventListener("DOMContentLoaded", () => {
   RadarLeaguesChart.init();
   BarLeaguesChart.init();
   PcaScatterChart.init();
-  KroosMultilineChart.init();
   KroosVsLeagueRadarChart.init();
   KroosTrajectoryChart.init();
   SuccessorRankingChart.init();
+  ParallelCoordsChart.init();
   ComparisonRadarChart.init();
 
   // Start loading data — emits "data:ready" when complete
