@@ -85,6 +85,8 @@ TROPHY_TIMELINE = [
     {"season": "2022-23", "laliga": False, "copa": True,  "ucl": False},
     {"season": "2023-24", "laliga": False, "copa": False, "ucl": True},
     {"season": "2024-25", "laliga": False, "copa": False, "ucl": False},
+    {"season": "2025-26", "laliga": False, "copa": False, "ucl": False},
+
 ]
 
 FBREF_MERGE_KEYS      = ["player", "team", "league", "season"]
@@ -282,6 +284,7 @@ def extract_player_data(df: pd.DataFrame) -> pd.DataFrame:
         "player":                      "player",
         "comp":                        "league",
         "season":                      "season",
+        "Current Age":                 "current_age",
         "Progressive Passes":          "prog_passes_total",
         "Key passes":                  "key_passes_total_pd",
         "Pass completion %":           "pass_completion_pct",
@@ -613,7 +616,7 @@ def run_pca_and_clustering(df: pd.DataFrame):
 def build_players_csv(df: pd.DataFrame) -> pd.DataFrame:
     cols = [
         "player_id", "player", "team", "league", "season",
-        "age", "nationality", "minutes",
+        "age", "current_age", "nationality", "minutes",
         # FBref standard + shooting + misc
         "goals_per90", "assists_per90", "ga_nopk_per90",
         "shots_per90", "shots_on_target_per90", "goals_per_shot",

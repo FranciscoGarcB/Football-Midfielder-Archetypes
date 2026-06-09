@@ -53,10 +53,22 @@ const ParallelCoordsChart = (() => {
     if (!wrap) return;
 
     const data = DataTransforms.applyFilters(rawData);
-    if (!data.length) return;
+
+    // FOOLPROOF FIX: Read the club selection directly from the DOM element
+    const selectedTeam = document.getElementById("filter-team")?.value || "all";
+
+    // Filter the active data array by team if a specific club is chosen
+    const filteredByTeam = selectedTeam === "all"
+      ? data
+      : data.filter(d => d.team === selectedTeam);
+
+    if (!filteredByTeam.length) {
+      wrap.innerHTML = "<p style='color:var(--text-muted);padding:1rem;'>No players match the team filter.</p>";
+      return;
+    }
 
     // Use latest season per player to avoid visual clutter from multi-season duplicates
-    const latestFiltered = DataTransforms.latestSeasonPerPlayer(data);
+    const latestFiltered = DataTransforms.latestSeasonPerPlayer(filteredByTeam);
 
     // Always include Kroos even if his league is filtered out
     const kroosAll = DataTransforms.latestSeasonPerPlayer(rawData)

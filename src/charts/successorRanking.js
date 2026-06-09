@@ -42,13 +42,18 @@ const SuccessorRankingChart = (() => {
     const latest = DataTransforms.latestSeasonPerPlayer(filtered);
 
     const maxAge = +(document.getElementById("ctrl-05a-maxage")?.value || 99);
+    const selectedTeam = document.getElementById("filter-team")?.value || "all";
 
-    const candidates = latest.filter(d =>
-      d.name !== "Toni Kroos" &&
-      d.similarity_to_kroos != null &&
-      isFinite(+d.similarity_to_kroos) &&
-      (!d.age || +d.age <= maxAge)
-    );
+    const candidates = latest.filter(d => {
+      // Direct pull from your pre-calculated dataset column
+      const currentAge = d.current_age || d['Current Age'] || +d.age;
+
+      return d.name !== "Toni Kroos" &&
+        d.similarity_to_kroos != null &&
+        isFinite(+d.similarity_to_kroos) &&
+        (currentAge <= maxAge) && // Connects age check directly to column
+        (selectedTeam === "all" || d.team === selectedTeam)
+    });
 
     return candidates
       .sort((a, b) => b.similarity_to_kroos - a.similarity_to_kroos)
@@ -120,12 +125,15 @@ const SuccessorRankingChart = (() => {
         .style("cursor", "pointer")
         .on("click", () => selectPlayer(d))
         .on("mouseover", event => {
+          // Point the tooltip directly to the column property
+          const currentAge = d.current_age || d['current_age'] || d.age;
+
           tooltip.classed("visible", true)
             .html(`
               <div class="tooltip-name">${d.name}</div>
               <div class="tooltip-row">
-                <span>Age</span>
-                <span class="tooltip-val">${d.age || "—"}</span>
+                <span>Current Age</span>
+                <span class="tooltip-val">${currentAge || "—"}</span>
               </div>
               <div class="tooltip-row">
                 <span>League</span>
