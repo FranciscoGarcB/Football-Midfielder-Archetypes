@@ -40,7 +40,7 @@ PLAYER_DATA_DIR  = os.path.join(RAW_DIR, "player_data")
 
 KROOS_NAME        = "Toni Kroos"
 KROOS_PRIME_START = "2019-20"
-KROOS_PRIME_END   = "2022-23"
+KROOS_PRIME_END   = "2023-24"
 MIN_MINUTES       = 900
 N_CLUSTERS        = 5
 PCA_COMPONENTS    = 4
