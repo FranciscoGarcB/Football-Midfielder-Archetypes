@@ -54,10 +54,7 @@ const ParallelCoordsChart = (() => {
 
     const data = DataTransforms.applyFilters(rawData);
 
-    // FOOLPROOF FIX: Read the club selection directly from the DOM element
     const selectedTeam = document.getElementById("filter-team")?.value || "all";
-
-    // Filter the active data array by team if a specific club is chosen
     const filteredByTeam = selectedTeam === "all"
       ? data
       : data.filter(d => d.team === selectedTeam);

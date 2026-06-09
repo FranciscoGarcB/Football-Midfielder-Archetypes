@@ -45,6 +45,7 @@ const DataLoader = (() => {
       league:       d.league,
       season:       d.season,
       age:          +d.age,
+      current_age:  +d.current_age,
       nationality:  d.nationality,
       minutes:      +d.minutes,
 

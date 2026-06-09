@@ -21,6 +21,11 @@ const SuccessorRankingChart = (() => {
     document.getElementById("ctrl-05a-maxage")
       ?.addEventListener("change", () => redraw());
 
+    document.getElementById("filter-team")
+      ?.addEventListener("change", () => {
+        AppState.trigger("filters:changed");
+      });
+
     const observer = new MutationObserver(() => {
       const data = AppState.get("rawData");
       if (data) draw(data);
@@ -46,7 +51,7 @@ const SuccessorRankingChart = (() => {
 
     const candidates = latest.filter(d => {
       // Direct pull from your pre-calculated dataset column
-      const currentAge = d.current_age || d['Current Age'] || +d.age;
+      const currentAge = d.current_age || d['current_age']|| d.age;
 
       return d.name !== "Toni Kroos" &&
         d.similarity_to_kroos != null &&
