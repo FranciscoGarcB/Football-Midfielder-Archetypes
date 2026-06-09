@@ -237,14 +237,14 @@ Current assignments:
 
 ## Visualization Sections
 
-### §01 — Context: Why does it matter?
+### 01 — Context: Why does it matter?
 
 | Chart | Description | Interaction |
 |-------|-------------|-------------|
 | Real Madrid trophy timeline | Dot-plot: UCL, La Liga, Copa del Rey across seasons; filled = won, hollow = lost | Hover for season detail |
 | Kroos stats by season | Line chart of a single Kroos metric across seasons | Dropdown switches metric |
 
-### §02 — Landscape: How do leagues compare?
+### 02 — Landscape: How do leagues compare?
 
 | Chart | Description | Interaction |
 |-------|-------------|-------------|
@@ -253,20 +253,20 @@ Current assignments:
 
 Radar normalization uses the **95th percentile** (not the max) as the ceiling per axis. This prevents a single outlier from compressing all other values toward zero, while keeping the shape differences between leagues legible.
 
-### §03 — Archetypes: The midfielder space
+### 03 — Archetypes: The midfielder space
 
 | Chart | Description | Interaction |
 |-------|-------------|-------------|
 | Midfielder PCA space | 2D scatter (PC1 × PC2) of all players with full features; colored by cluster; Kroos in gold | Zoom/pan; click dot to open player card sidebar; search by name with dropdown; cluster legend to highlight/dim groups; global league/season/minutes filters apply |
 
-### §04 — Anatomy of Toni Kroos
+### 04 — Anatomy of Toni Kroos
 
 | Chart | Description | Interaction |
 |-------|-------------|-------------|
 | Kroos vs La Liga average | Radar overlay: Kroos career average across all seasons vs La Liga top-10% average across same seasons | Static — not affected by any global filter |
 | Trajectory in archetype space | Animated path of Kroos's PCA position from 2017 to 2023 over the background of all midfielders | Play/pause button; manual year scrub slider |
 
-### §05 — Who can replace Kroos?
+### 05 — Who can replace Kroos?
 
 | Chart | Description | Interaction |
 |-------|-------------|-------------|
