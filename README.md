@@ -1,6 +1,6 @@
 # Midfielder Football Player Archetypes
 
-An interactive data visualization exploring midfielder archetypes across the top 5 European football leagues (2017–2023), centered around the question: **what made Toni Kroos irreplaceable, and who comes closest to filling that role today?**
+An interactive data visualization exploring midfielder archetypes across the top 5 European football leagues (2017–2025), centered around the question: **what made Toni Kroos irreplaceable, and who comes closest to filling that role today?**
 
 ---
 
