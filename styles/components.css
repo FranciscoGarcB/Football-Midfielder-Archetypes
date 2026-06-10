@@ -158,6 +158,12 @@
   outline: none;
 }
 
+.control-btn--active {
+  background: var(--text-accent);
+  color: var(--bg-base);
+  border-color: var(--text-accent);
+}
+
 .control-btn {
   font-family: var(--font-ui);
   background: var(--bg-raised);

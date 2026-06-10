@@ -5,7 +5,8 @@
 
 const SuccessorRankingChart = (() => {
 
-  let selectedId = null;
+  let selectedId    = null;
+  let realMadridOnly = false;
 
   function css(v) {
     return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -20,6 +21,15 @@ const SuccessorRankingChart = (() => {
 
     document.getElementById("ctrl-05a-maxage")
       ?.addEventListener("change", () => redraw());
+
+    document.getElementById("ctrl-05a-realmadrid")
+      ?.addEventListener("click", e => {
+        realMadridOnly = !realMadridOnly;
+        e.currentTarget.dataset.active = realMadridOnly ? "true" : "false";
+        e.currentTarget.classList.toggle("control-btn--active", realMadridOnly);
+        AppState.emit("filter:realmadrid", realMadridOnly);
+        redraw();
+      });
 
     const observer = new MutationObserver(() => {
       const data = AppState.get("rawData");
@@ -47,7 +57,8 @@ const SuccessorRankingChart = (() => {
       d.name !== "Toni Kroos" &&
       d.similarity_to_kroos != null &&
       isFinite(+d.similarity_to_kroos) &&
-      (!d.age || +d.age <= maxAge)
+      (!d.age || +d.age <= maxAge) &&
+      (!realMadridOnly || (d.team || "").toLowerCase().includes("real madrid"))
     );
 
     return candidates

@@ -20,6 +20,7 @@ const ParallelCoordsChart = (() => {
 
   let selectedId     = null;
   let hiddenClusters = new Set();
+  let realMadridOnly = false;
 
   function css(v) {
     return getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -30,6 +31,11 @@ const ParallelCoordsChart = (() => {
       requestAnimationFrame(() => requestAnimationFrame(() => draw(players)))
     );
     AppState.on("filters:changed", () => redraw());
+    AppState.on("filter:realmadrid", active => {
+      realMadridOnly = active;
+      redraw();
+    });
+
     AppState.on("successor:selected", player => {
       selectedId = player?.id || null;
       redraw();
@@ -120,7 +126,8 @@ const ParallelCoordsChart = (() => {
     const bgPlayers     = latest.filter(d =>
       d.name !== "Toni Kroos" &&
       d.id   !== selectedId   &&
-      !hiddenClusters.has(d.cluster)
+      !hiddenClusters.has(d.cluster) &&
+      (!realMadridOnly || (d.team || "").toLowerCase().includes("real madrid"))
     );
     const selectedPlayer = latest.find(d => d.id === selectedId);
     const kroosPlayer    = latest.find(d => d.name === "Toni Kroos");
