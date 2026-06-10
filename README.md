@@ -270,7 +270,7 @@ Radar normalization uses the **95th percentile** (not the max) as the ceiling pe
 
 | Chart | Description | Interaction |
 |-------|-------------|-------------|
-| Top 10 potential successors | Lollipop chart ranked by `similarity_to_kroos`; score shown as percentage | Max-age dropdown filter; respects global league/season/minutes filters; click any row to select for comparison |
+| Top 10 potential successors | Lollipop chart ranked by `similarity_to_kroos`; score shown as percentage | Max-age dropdown and Real Madrid Only filters; respects global league/season/minutes filters; click any row to select for comparison |
 | Profile comparison | Radar overlay: Kroos career average vs selected successor's latest season | Updates on successor row click |
 | Parallel coordinates | All filtered midfielders as background lines; Kroos always shown in gold; selected successor highlighted in cluster color | Cluster color legend toggles archetype visibility; hover any line for name/role; Kroos persists even when his league is filtered |
 
