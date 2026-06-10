@@ -77,12 +77,12 @@ const ComparisonRadarChart = (() => {
       rawCand[ax.key]  = candidate[ax.key] || 0;
     });
 
-    const candColor = "#3b82f6";
+    const candColor = "#D3D3D3";
 
     RadarLeaguesChart.drawRadarSVG(wrap, [kroosProfile, candidateProfile], {
       colors:   {
         [kroosLabel]:     css("--kroos-color"),
-        [candidateLabel]: candColor,
+        [candidateLabel]: "#5c5750",
       },
       labelKey:    "label",
       size:        Math.min(wrap.clientWidth || 320, 340),

@@ -41,7 +41,7 @@ const DataTransforms = (() => {
     1: "#4ade80",
     2: "#c084fc",
     3: "#60a5fa",
-    4: "#f0c060",
+    4: "#ec4899",
   };
 
   function applyFilters(data, filters) {
