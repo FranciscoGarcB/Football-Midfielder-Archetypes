@@ -77,7 +77,7 @@ const ComparisonRadarChart = (() => {
       rawCand[ax.key]  = candidate[ax.key] || 0;
     });
 
-    const candColor = DataTransforms.CLUSTER_COLORS[candidate.cluster] || "#60a5fa";
+    const candColor = "#3b82f6";
 
     RadarLeaguesChart.drawRadarSVG(wrap, [kroosProfile, candidateProfile], {
       colors:   {
