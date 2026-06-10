@@ -84,7 +84,7 @@ The visualization merges four data sources:
 | Understat | `soccerdata` `sd.Understat` | xG, np_xG, xA, key passes, xG chain, xG buildup |
 | FBref season CSVs | Manual export → `data/raw/player_data/` | Progressive passes, key passes, pass completion %, long pass %, GCA, progressive carries |
 
-All sources cover the **Big 5 European Leagues** for seasons **2017-20 through 2023-24**. Only midfielders (position containing `MF`) are retained.
+All sources cover the **Big 5 European Leagues** for seasons **2017-20 through 2024-25**. Only midfielders (position containing `MF`) are retained.
 
 ---
 
