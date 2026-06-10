@@ -145,9 +145,9 @@ player_data join: 7195/10764 rows matched (3569 unmatched)
 
 ### Per-90 conversions
 
-FBref misc stats (`Performance_TklW`, `Performance_Int`, etc.) are raw totals. They are divided by `Playing Time_90s` from the standard table. player_data stats (`Progressive Passes`, `Key passes`, etc.) are also raw totals, divided by `pd_nineties = (Avg Mins per Match × Matches Played) / 90`.
+FBref misc stats (`Performance_TklW`, `Performance_Int`, etc.) and player_data stats (`Progressive Passes`, `Key passes`, etc.) are raw totals. They are divided by `Playing Time_90s` from the standard table.
 
-Understat totals (`xa`, `np_xg`, `key_passes`) are divided by the same FBref `nineties` denominator.
+Understat totals (`xa`, `np_xg`, `key_passes`) are divided by the same FBref `Playing Time_90s` denominator.
 
 Some columns arrive pre-computed (`Pass completion %`, `% Long passes completed`, `Goal creating actions p 90`) and are used as-is without division.
 
