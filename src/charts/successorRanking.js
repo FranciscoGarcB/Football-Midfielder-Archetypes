@@ -53,13 +53,17 @@ const SuccessorRankingChart = (() => {
 
     const maxAge = +(document.getElementById("ctrl-05a-maxage")?.value || 99);
 
-    const candidates = latest.filter(d =>
+    const candidates = latest.filter(d => {
+      const currentAge = d.current_age || d.age;
+
+      return(
       d.name !== "Toni Kroos" &&
       d.similarity_to_kroos != null &&
       isFinite(+d.similarity_to_kroos) &&
-      (!d.age || +d.age <= maxAge) &&
+      (currentAge <= maxAge) &&
       (!realMadridOnly || (d.team || "").toLowerCase().includes("real madrid"))
-    );
+      );
+    });
 
     return candidates
       .sort((a, b) => b.similarity_to_kroos - a.similarity_to_kroos)
@@ -131,12 +135,14 @@ const SuccessorRankingChart = (() => {
         .style("cursor", "pointer")
         .on("click", () => selectPlayer(d))
         .on("mouseover", event => {
+          const currentAge = d.current_age || d['current_age'] || d.age;
+
           tooltip.classed("visible", true)
             .html(`
               <div class="tooltip-name">${d.name}</div>
               <div class="tooltip-row">
-                <span>Age</span>
-                <span class="tooltip-val">${d.age || "—"}</span>
+                <span>Current Age</span>
+                <span class="tooltip-val">${currentAge || "—"}</span>
               </div>
               <div class="tooltip-row">
                 <span>Season</span>

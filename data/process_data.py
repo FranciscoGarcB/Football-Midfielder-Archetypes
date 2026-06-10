@@ -283,6 +283,7 @@ def extract_player_data(df: pd.DataFrame) -> pd.DataFrame:
         "player":                      "player",
         "comp":                        "league",
         "season":                      "season",
+        "Current Age":                 "current_age",
         "Progressive Passes":          "prog_passes_total",
         "Key passes":                  "key_passes_total_pd",
         "Pass completion %":           "pass_completion_pct",
@@ -601,7 +602,7 @@ def run_pca_and_clustering(df: pd.DataFrame):
 def build_players_csv(df: pd.DataFrame) -> pd.DataFrame:
     cols = [
         "player_id", "player", "team", "league", "season",
-        "age", "nationality", "minutes",
+        "age", "current_age", "nationality", "minutes",
         # FBref standard + shooting + misc
         "goals_per90", "assists_per90", "ga_nopk_per90",
         "shots_per90", "shots_on_target_per90", "goals_per_shot",
@@ -644,6 +645,7 @@ def build_pca_json(df: pd.DataFrame, variance: list) -> dict:
             "league":              row["league"],
             "season":              str(row["season"]),
             "age":                 int(row["age"]) if pd.notna(row.get("age")) else None,
+            "current_age":         int(row["current_age"]) if pd.notna(row.get("current_age")) else None,
             "minutes":             int(row["minutes"]),
             "cluster":             int(row["cluster"]),
             "pc1":                 round(float(row["pc1"]), 4),
