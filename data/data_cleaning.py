@@ -1,3 +1,22 @@
+"""
+data_cleaning.py
+
+Reads the master multi-season historical player dataset, maps compressed or technical
+column headers to a standardized and readable layout, fills missing or goalkeeper-specific
+metrics with defaults, and calculates each player's current age relative to 2026.
+Splits the combined data into individual per-season CSV files for the process_data.py
+pipeline to merge.
+
+Sources:
+    raw/player_data/Top5_League_Players_2017to2024_dataset.csv — Raw multi-season player stats
+
+Run from the project root:
+    python data/data_cleaning.py
+
+Output (written to raw/player_data/):
+    cleaned_YYYY-YY.csv  — Standardized, per-season player data files
+"""
+
 import pandas as pd
 import os
 
