@@ -139,6 +139,10 @@ const SuccessorRankingChart = (() => {
                 <span class="tooltip-val">${d.age || "—"}</span>
               </div>
               <div class="tooltip-row">
+                <span>Season</span>
+                <span class="tooltip-val">${d.season}</span>
+              </div>
+              <div class="tooltip-row">
                 <span>League</span>
                 <span class="tooltip-val">${d.league}</span>
               </div>
