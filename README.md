@@ -329,3 +329,41 @@ d3 v7   https://cdn.jsdelivr.net/npm/d3@7
 - Expected stats (xG, xA): [Understat](https://understat.com) via soccerdata
 - [Kaggle dataset](https://www.kaggle.com/datasets/emrey3lmaz/top-5-league-football-player-stats-2017-2025?resource=download) 
 - Trophy results: compiled manually from public records
+
+## Use of AI Assistance
+
+### Role of Claude
+
+This project used [Claude](https://claude.ai) (Anthropic) as a coding assistant during implementation. All research questions, analytical decisions, visualization design choices, and interpretive conclusions are the original work of the project team. Claude was used exclusively as a tool for accelerating code generation and debugging - not for ideation, data interpretation, or academic content.
+
+---
+
+### What the team defined independently
+
+- The central research question and hypothesis (quantifying the "Kroos role" and identifying successors)
+- The choice of data sources (FBref, Understat, manual season CSVs) and which metrics are relevant to the analysis
+- The visualization types selected for each section and the reasoning behind them (PCA scatter, parallel coordinates, radar, lollipop, etc.)
+- The feature set for the PCA model and the decision to use 4 components
+- The definition of Kroos's "prime seasons" (2019-20 to 2022-23) as the reference centroid for similarity
+- Cluster archetype names and their manual assignment after inspecting model output
+- The narrative structure of the page (context → landscape → archetypes → anatomy → successors)
+- All analytical conclusions drawn from the visualizations
+
+---
+
+### Areas where Claude assisted with code generation
+
+| Area | What Claude generated |
+|------|-----------------------|
+| **Data pipeline** (`process_data.py`) | FBref/Understat scraping via soccerdata, multi-source join logic, per-90 conversions, PCA + k-means pipeline, similarity score computation, cluster profile diagnostics |
+| **D3 chart implementations** | All 10 chart files in `src/charts/` — SVG rendering, scales, axes, transitions, zoom/pan, tooltips, brush interactions |
+| **Application architecture** | `AppState` event bus, `dataLoader.js`, `dataTransforms.js` helper functions, `app.js` initialization order |
+| **UI components** | Player card sidebar, cluster legend, league toggles, search dropdown with keyboard navigation, theme toggle |
+| **CSS system** | Design tokens, dark/light theme via CSS custom properties, responsive layout, component styles |
+| **Debugging** | Diagnosing the `requestAnimationFrame` issue causing blank charts on load, the `pd_nineties` denominator bug, duplicate `parseRow` keys, and the PCA distortion caused by zero-imputed missing values |
+
+---
+
+### Prompting approach
+
+The team directed Claude through detailed natural-language prompts describing the desired behavior, data schema, and visual output. When outputs did not match expectations - for example, incorrect per-90 calculations, broken join logic, or visual rendering issues - the team identified the root cause and instructed Claude to correct it. All generated code was reviewed and tested by the team before integration.
