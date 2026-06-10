@@ -8,14 +8,14 @@
 const ParallelCoordsChart = (() => {
 
   const AXES = [
-    { key: "progressive_passes_per90", label: "Prog. passes" },
-    { key: "key_passes_per90",         label: "Key passes"   },
-    { key: "xa_per90",                 label: "xA"           },
-    { key: "pass_completion_pct",      label: "Pass %"       },
-    { key: "np_xg_per90",              label: "npxG"         },
-    { key: "goals_per90",              label: "Goals"        },
-    { key: "tackles",                  label: "Tackles"      },
-    { key: "interceptions",            label: "Interceptions"},
+    { key: "progressive_passes_per90", label: "Prog. passes", unit: "/ 90" },
+    { key: "key_passes_per90",         label: "Key passes",   unit: "/ 90" },
+    { key: "xa_per90",                 label: "xA",           unit: "/ 90" },
+    { key: "pass_completion_pct",      label: "Pass %",       unit: "%"    },
+    { key: "np_xg_per90",              label: "npxG",         unit: "/ 90" },
+    { key: "goals_per90",              label: "Goals",        unit: "/ 90" },
+    { key: "tackles",                  label: "Tackles",      unit: "/ 90" },
+    { key: "interceptions",            label: "Interceptions",unit: "/ 90" },
   ];
 
   let selectedId     = null;
@@ -156,7 +156,7 @@ const ParallelCoordsChart = (() => {
               <div class="tooltip-divider"></div>
               ${activeAxes.map(ax => `
               <div class="tooltip-row">
-                <span>${ax.label}</span>
+                <span>${ax.label} <span style="opacity:.55;font-size:.85em">${ax.unit}</span></span>
                 <span class="tooltip-val">${(+d[ax.key] || 0).toFixed(ax.key === "pass_completion_pct" || ax.key === "long_pass_pct" ? 1 : 2)}</span>
               </div>`).join("")}
             `);
@@ -192,7 +192,7 @@ const ParallelCoordsChart = (() => {
               <div class="tooltip-divider"></div>
               ${activeAxes.map(ax => `
               <div class="tooltip-row">
-                <span>${ax.label}</span>
+                <span>${ax.label} <span style="opacity:.55;font-size:.85em">${ax.unit}</span></span>
                 <span class="tooltip-val">${(+selectedPlayer[ax.key] || 0).toFixed(ax.key === "pass_completion_pct" || ax.key === "long_pass_pct" ? 1 : 2)}</span>
               </div>`).join("")}
             `);
@@ -221,7 +221,7 @@ const ParallelCoordsChart = (() => {
               <div class="tooltip-divider"></div>
               ${activeAxes.map(ax => `
               <div class="tooltip-row">
-                <span>${ax.label}</span>
+                <span>${ax.label} <span style="opacity:.55;font-size:.85em">${ax.unit}</span></span>
                 <span class="tooltip-val">${(+kroosPlayer[ax.key] || 0).toFixed(ax.key === "pass_completion_pct" || ax.key === "long_pass_pct" ? 1 : 2)}</span>
               </div>`).join("")}
             `);
