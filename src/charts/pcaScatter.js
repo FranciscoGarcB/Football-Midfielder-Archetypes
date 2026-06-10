@@ -394,6 +394,10 @@ const PcaScatterChart = (() => {
                   <span class="tooltip-val">${d.team}</span>
                 </div>
                 <div class="tooltip-row">
+                  <span>Age</span>
+                  <span class="tooltip-val">${d.age}</span>
+                </div>
+                <div class="tooltip-row">
                   <span>League</span>
                   <span class="tooltip-val">${d.league}</span>
                 </div>
