@@ -170,17 +170,6 @@ def extract_misc(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def extract_understat(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Understat totals (not per 90). Kept as totals here; converted to per-90
-    after the join with FBref using the minutes column from standard_data.
-
-    Columns used:
-        xa          -> xa_total         (expected assists — quality of final passes)
-        key_passes  -> key_passes_total (passes that ended in a shot)
-        np_xg       -> np_xg_total      (non-penalty expected goals)
-        xg_chain    -> xg_chain         (xG of all sequences player was involved in)
-        xg_buildup  -> xg_buildup       (xG of sequences, excluding shot and assist)
-    """
     col_map = {
         "player":      "player",
         "league":      "league",
@@ -194,25 +183,14 @@ def extract_understat(df: pd.DataFrame) -> pd.DataFrame:
     available = {k: v for k, v in col_map.items() if k in df.columns}
     out = df[list(available.keys())].rename(columns=available).copy()
 
-    # Understat may have multiple rows per player-season (different teams
-    # after a transfer). Keep the row with the highest xa_total as it
-    # corresponds to the longer stint.
     if "xa_total" in out.columns:
         out = out.sort_values("xa_total", ascending=False).drop_duplicates(
             subset=["player", "league", "season"]
         )
     return out
 
-def load_player_data() -> pd.DataFrame | None:
-    """
-    Reads all cleaned_YYYY-YY.csv files from data/raw/player_data/ and
-    concatenates them into a single DataFrame.
-    Returns None if the directory does not exist or is empty.
 
-    Season label in the files matches the format used throughout the pipeline
-    (e.g. "2022-23"), so no conversion is needed — the column is already a
-    string in that format.
-    """
+def load_player_data() -> pd.DataFrame | None:
     if not os.path.isdir(PLAYER_DATA_DIR):
         print("  player_data/ directory not found — skipping.")
         return None
@@ -243,11 +221,6 @@ def load_player_data() -> pd.DataFrame | None:
 
 
 def _normalize_league(raw: str) -> str:
-    """
-    Maps any realistic FBref league name variant to the canonical VALID_LEAGUES name.
-    Covers prefixed forms (e.g. "de Bundesliga", "eng Premier League"),
-    plain forms, and lowercase variants.
-    """
     KEYWORDS = {
         "premier league": "Premier League",
         "la liga":        "La Liga",
@@ -263,21 +236,6 @@ def _normalize_league(raw: str) -> str:
 
 
 def extract_player_data(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Extracts passing and creativity metrics from the cleaned season CSVs.
-
-    Relevant columns (original name -> internal name):
-        player                     -> player
-        comp                       -> league  (normalized via _normalize_league)
-        season                     -> season
-        Progressive Passes         -> prog_passes_total   (total — divided by 90s)
-        Key passes                 -> key_passes_total_pd (total — divided by 90s)
-        Pass completion %          -> pass_completion_pct (already %, keep as-is)
-        Shot creating actions p 90 -> sca_per90           (already per-90)
-        1/3                        -> passes_final_third_total
-        Avg Mins per Match         -> used to derive pd_nineties, then dropped
-        Matches Played             -> used to derive pd_nineties, then dropped
-    """
     col_map = {
         "player":                      "player",
         "comp":                        "league",
@@ -291,42 +249,23 @@ def extract_player_data(df: pd.DataFrame) -> pd.DataFrame:
         "Progressive Carries":         "prog_carries_total",
         "carries final 3rd":           "carries_final_third_total",
         "1/3":                         "passes_final_third_total",
-        "Avg Mins per Match":          "avg_mins",
-        "Matches Played":              "matches_played",
     }
     available = {k: v for k, v in col_map.items() if k in df.columns}
     out = df[list(available.keys())].rename(columns=available).copy()
 
-    # Normalize league names using keyword matching — handles any prefix/case variant
     if "league" in out.columns:
-        raw_leagues = out["league"].astype(str).str.strip().unique().tolist()
-        print(f"  player_data raw league values: {raw_leagues}")
         out["league"] = out["league"].astype(str).apply(_normalize_league)
-        normalized = out["league"].unique().tolist()
-        print(f"  player_data normalized leagues: {normalized}")
 
-    # Derive 90s denominator from avg_mins * matches_played
-    if "avg_mins" in out.columns and "matches_played" in out.columns:
-        total_min = (
-            pd.to_numeric(out["avg_mins"], errors="coerce") *
-            pd.to_numeric(out["matches_played"], errors="coerce")
-        )
-        out["pd_nineties"] = (total_min / 90).replace(0, np.nan).round(4)
-        out.drop(columns=["avg_mins", "matches_played"], inplace=True)
-
-    # Normalize season format: "2019-2020" -> "2019-20"
     if "season" in out.columns:
         def _short_season(s):
             s = str(s).strip()
-            if len(s) == 9 and s[4] == "-":  # "2019-2020"
-                return s[:4] + "-" + s[7:]   # "2019-20"
+            if len(s) == 9 and s[4] == "-":
+                return s[:4] + "-" + s[7:]
             return s
         out["season"] = out["season"].apply(_short_season)
 
     out = out.dropna(subset=["player", "league", "season"])
 
-    # Deduplicate: keep the row with the most progressive passes for each
-    # player-league-season combo (handles mid-season transfers)
     sort_col = "prog_passes_total" if "prog_passes_total" in out.columns else "player"
     out = (
         out
@@ -363,24 +302,16 @@ def merge_sources(std, sht, misc, understat=None, player_data=None) -> pd.DataFr
         matched   = int(df["prog_passes_total"].notna().sum()) if "prog_passes_total" in df.columns else 0
         unmatched = before - matched
         print(f"  player_data join: {matched}/{before} rows matched ({unmatched} unmatched)")
-        if unmatched > 0 and matched == 0:
-            # Diagnose: show sample keys from both sides
-            print("  WARNING: 0 matches — checking key overlap:")
-            print(f"    FBref leagues:       {sorted(df['league'].unique())}")
-            print(f"    player_data leagues: {sorted(player_data['league'].unique())}")
-            print(f"    FBref seasons:       {sorted(df['season'].unique())[:5]}")
-            print(f"    player_data seasons: {sorted(player_data['season'].unique())[:5]}")
-            print(f"    FBref sample player: {df['player'].iloc[0]!r}")
-            print(f"    player_data sample:  {player_data['player'].iloc[0]!r}")
 
     return df
 
 
 def derive_per90_cols(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Converts FBref misc totals and Understat totals to per-90 rates.
-    Uses nineties (Playing Time_90s from standard_data) as the denominator.
+    Converts FBref misc, Understat, and player_data totals to per-90 rates.
+    Strictly uses nineties (Playing Time_90s from standard_data) as the canonical denominator.
     """
+    # Denominator extracted strictly from standard_data
     n = df["nineties"].replace(0, np.nan)
 
     # FBref misc totals → per-90
@@ -399,52 +330,44 @@ def derive_per90_cols(df: pd.DataFrame) -> pd.DataFrame:
     if "np_xg_total" in df.columns:
         df["np_xg_per90"] = (df["np_xg_total"] / n).round(4)
 
-    # player_data totals → per-90
-    # Use pd_nineties derived from the CSV when available; fall back to FBref nineties.
-    n_pd = df.get("pd_nineties", pd.Series(dtype=float))
-    n_pd = pd.to_numeric(n_pd, errors="coerce")
-    n_pd = n_pd.where(n_pd > 0, n)  # fall back to FBref 90s if missing
-
+    # player_data totals → per-90 (Now unifed to use standard_data 'n' denominator)
     if "prog_passes_total" in df.columns:
         df["progressive_passes_per90"] = (
-            pd.to_numeric(df["prog_passes_total"], errors="coerce") / n_pd
+            pd.to_numeric(df["prog_passes_total"], errors="coerce") / n
         ).round(4)
 
     if "key_passes_total_pd" in df.columns:
         df["key_passes_per90"] = (
-            pd.to_numeric(df["key_passes_total_pd"], errors="coerce") / n_pd
+            pd.to_numeric(df["key_passes_total_pd"], errors="coerce") / n
         ).round(4)
     elif "key_passes_total" in df.columns:
-        # Fall back to Understat key_passes if player_data not available
         df["key_passes_per90"] = (
-            pd.to_numeric(df["key_passes_total"], errors="coerce") / n_pd
+            pd.to_numeric(df["key_passes_total"], errors="coerce") / n
         ).round(4)
 
-    # pass_completion_pct and long_pass_pct come pre-computed — no division needed
+    # Percentage stats (already formatted, just fill na)
     for pct_col in ["pass_completion_pct", "long_pass_pct"]:
         if pct_col in df.columns:
             df[pct_col] = pd.to_numeric(df[pct_col], errors="coerce").fillna(0)
 
-    # gca_per90 already per-90 in the CSV
     if "gca_per90" in df.columns:
         df["gca_per90"] = pd.to_numeric(df["gca_per90"], errors="coerce").fillna(0)
 
-    # player_data carry totals → per-90
+    # player_data carries totals → per-90
     if "prog_carries_total" in df.columns:
         df["prog_carries_per90"] = (
-            pd.to_numeric(df["prog_carries_total"], errors="coerce") / n_pd
+            pd.to_numeric(df["prog_carries_total"], errors="coerce") / n
         ).round(4)
 
     if "carries_final_third_total" in df.columns:
         df["carries_final_third_per90"] = (
-            pd.to_numeric(df["carries_final_third_total"], errors="coerce") / n_pd
+            pd.to_numeric(df["carries_final_third_total"], errors="coerce") / n
         ).round(4)
 
-    # FBref misc fouls committed → per-90
     if "fouls_committed_total" in df.columns:
         df["fouls_committed_per90"] = (df["fouls_committed_total"] / n).round(4)
 
-    # Ensure all FEATURE_COLS exist, filling missing values with 0
+    # Fallback to guarantee space consistency
     for col in FEATURE_COLS:
         if col not in df.columns:
             df[col] = 0.0
@@ -483,9 +406,6 @@ def clean(df: pd.DataFrame) -> pd.DataFrame:
 def run_pca_and_clustering(df: pd.DataFrame):
     df_active = df[df["minutes"] >= MIN_MINUTES].copy()
 
-    # Restrict PCA fitting to players that have all player_data columns populated.
-    # This ensures pass_completion_pct, progressive_passes_per90, etc. are real
-    # values and not zeros from unmatched joins.
     pd_cols = [
         "progressive_passes_per90", "key_passes_per90", "pass_completion_pct",
         "long_pass_pct", "gca_per90", "prog_carries_per90", "carries_final_third_per90",
@@ -504,7 +424,6 @@ def run_pca_and_clustering(df: pd.DataFrame):
         if c not in df_pca.columns:
             df_pca[c] = 0.0
 
-    # Fit scaler and PCA on the full-feature subset
     X_pca = df_pca[FEATURE_COLS].fillna(0).values
     scaler = StandardScaler()
     X_pca_scaled = scaler.fit_transform(X_pca)
@@ -524,7 +443,6 @@ def run_pca_and_clustering(df: pd.DataFrame):
           " ".join(f"PC{i+1}={v:.3f}" for i,v in enumerate(variance)) +
           f"  (cumulative: {cumvar:.3f})")
 
-    # Build Kroos centroid in PCA space from prime seasons
     kroos_mask_pca = (
         (df_pca["player"] == KROOS_NAME) &
         (df_pca["season"] >= KROOS_PRIME_START) &
@@ -536,7 +454,6 @@ def run_pca_and_clustering(df: pd.DataFrame):
         print(f"  Warning: Kroos not found in PCA subset for "
               f"{KROOS_PRIME_START}–{KROOS_PRIME_END}. "
               f"Using feature-space centroid instead.")
-        # Fall back: build centroid in raw feature space from all Kroos rows
         kroos_all = df_active[df_active["player"] == KROOS_NAME]
         if kroos_all.empty:
             df_pca["similarity_to_kroos"] = 0.0
@@ -548,41 +465,31 @@ def run_pca_and_clustering(df: pd.DataFrame):
         pc_cols = [f"pc{i+1}" for i in range(PCA_COMPONENTS)]
         kroos_centroid_pca = kroos_prime[pc_cols].mean().values
 
-    # Features always available regardless of player_data match.
-    # Used to compute similarity for players missing the player_data columns.
     CORE_FEATURE_COLS = [
         "goals_per90", "assists_per90", "np_xg_per90", "xa_per90",
         "shots_per90", "tackles_won", "interceptions",
     ]
 
     if kroos_centroid_pca is not None:
-        # Similarity for full-feature players (in PCA space, all 4 components)
         distances = np.linalg.norm(coords - kroos_centroid_pca, axis=1)
         max_dist  = distances.max() or 1
         df_pca["similarity_to_kroos"] = (1 - distances / max_dist).round(4)
 
-        # Similarity for players WITHOUT player_data: compute in the sub-space
-        # of core features only, using a separate scaler fitted on the same
-        # full-feature subset (so the scale is consistent).
         core_scaler = StandardScaler()
         X_core_pca = df_pca[CORE_FEATURE_COLS].fillna(0).values
         core_scaler.fit(X_core_pca)
 
-        # Kroos centroid in core feature space
         kroos_core = df_pca[df_pca["player"] == KROOS_NAME][CORE_FEATURE_COLS].fillna(0).values
         if len(kroos_core):
             kroos_core_centroid = core_scaler.transform(kroos_core).mean(axis=0)
         else:
-            # Fall back: use all Kroos rows in df_active
             kroos_all_core = df_active[df_active["player"] == KROOS_NAME][CORE_FEATURE_COLS].fillna(0).values
             kroos_core_centroid = core_scaler.transform(kroos_all_core).mean(axis=0) if len(kroos_all_core) else np.zeros(len(CORE_FEATURE_COLS))
 
-        # Max distance in core space (calibrated on full-feature players so scale matches)
         X_core_all_pca = core_scaler.transform(df_pca[CORE_FEATURE_COLS].fillna(0).values)
         core_dists_pca  = np.linalg.norm(X_core_all_pca - kroos_core_centroid, axis=1)
         core_max_dist   = core_dists_pca.max() or 1
 
-        # Now compute for players without player_data
         no_pd_mask = ~has_pd
         if no_pd_mask.sum() > 0:
             df_no_pd = df_active[no_pd_mask].copy()
@@ -590,7 +497,6 @@ def run_pca_and_clustering(df: pd.DataFrame):
             dists_no_pd  = np.linalg.norm(X_core_no_pd - kroos_core_centroid, axis=1)
             df_no_pd["similarity_to_kroos"] = (1 - dists_no_pd / core_max_dist).round(4).clip(0, 1)
 
-            # Combine: full-feature players from df_pca, rest from df_no_pd
             sim_full  = df_pca[["player_id", "similarity_to_kroos"]]
             sim_nopd  = df_no_pd[["player_id", "similarity_to_kroos"]]
             sim_all   = pd.concat([sim_full, sim_nopd], ignore_index=True)
@@ -599,11 +505,9 @@ def run_pca_and_clustering(df: pd.DataFrame):
 
         df_active = df_active.merge(sim_all, on="player_id", how="left")
 
-    # Merge PCA coords + cluster back (only full-feature players get pc1-pc4)
     pca_cols = ["player_id", "pc1", "pc2", "pc3", "pc4", "cluster"]
     df = df.merge(df_pca[pca_cols], on="player_id", how="left")
 
-    # Merge similarity for ALL players (including those without player_data)
     sim_cols = ["player_id", "similarity_to_kroos"]
     df = df.merge(df_active[sim_cols], on="player_id", how="left")
 
@@ -614,19 +518,14 @@ def build_players_csv(df: pd.DataFrame) -> pd.DataFrame:
     cols = [
         "player_id", "player", "team", "league", "season",
         "age", "nationality", "minutes",
-        # FBref standard + shooting + misc
         "goals_per90", "assists_per90", "ga_nopk_per90",
         "shots_per90", "shots_on_target_per90", "goals_per_shot",
         "tackles_won", "interceptions", "fouls_drawn_per90", "crosses_per90",
-        # player_data season CSVs
         "progressive_passes_per90", "key_passes_per90", "pass_completion_pct",
         "long_pass_pct", "gca_per90", "prog_carries_per90", "carries_final_third_per90",
         "sca_per90", "passes_final_third_total",
-        # FBref misc (additional)
         "fouls_committed_per90",
-        # Understat
         "xa_per90", "np_xg_per90", "xg_chain", "xg_buildup",
-        # PCA + clustering
         "cluster", "pc1", "pc2", "pc3", "pc4", "similarity_to_kroos",
     ]
     cols = [c for c in cols if c in df.columns]
@@ -663,7 +562,6 @@ def build_pca_json(df: pd.DataFrame, variance: list) -> dict:
             "pc3":                 round(float(row["pc3"]), 4) if pd.notna(row.get("pc3")) else None,
             "pc4":                 round(float(row["pc4"]), 4) if pd.notna(row.get("pc4")) else None,
             "similarity_to_kroos": round(float(row["similarity_to_kroos"]), 4),
-            # FBref standard + shooting + misc
             "goals_per90":              g("goals_per90"),
             "assists_per90":            g("assists_per90"),
             "ga_nopk_per90":            g("ga_nopk_per90"),
@@ -674,7 +572,6 @@ def build_pca_json(df: pd.DataFrame, variance: list) -> dict:
             "interceptions":            g("interceptions"),
             "fouls_drawn":              g("fouls_drawn_per90"),
             "crosses":                  g("crosses_per90"),
-            # player_data season CSVs
             "progressive_passes_per90":  g("progressive_passes_per90"),
             "key_passes_per90":          g("key_passes_per90"),
             "pass_completion_pct":       g("pass_completion_pct"),
@@ -684,7 +581,6 @@ def build_pca_json(df: pd.DataFrame, variance: list) -> dict:
             "carries_final_third_per90": g("carries_final_third_per90"),
             "sca_per90":                 g("sca_per90"),
             "fouls_committed_per90":     g("fouls_committed_per90"),
-            # Understat
             "xa_per90":                 g("xa_per90"),
             "np_xg_per90":              g("np_xg_per90"),
             "xg_chain":                 g("xg_chain"),
@@ -710,7 +606,6 @@ def build_kroos_json(df: pd.DataFrame) -> dict:
             "season":              str(row["season"]),
             "age":                 int(row["age"]) if pd.notna(row.get("age")) else None,
             "minutes":             int(row["minutes"]),
-            # FBref standard + shooting + misc
             "goals_per90":              f("goals_per90"),
             "assists_per90":            f("assists_per90"),
             "ga_nopk_per90":            f("ga_nopk_per90"),
@@ -721,7 +616,6 @@ def build_kroos_json(df: pd.DataFrame) -> dict:
             "interceptions":            f("interceptions"),
             "fouls_drawn":              f("fouls_drawn_per90"),
             "crosses":                  f("crosses_per90"),
-            # player_data season CSVs
             "progressive_passes_per90":  f("progressive_passes_per90"),
             "key_passes_per90":          f("key_passes_per90"),
             "pass_completion_pct":       f("pass_completion_pct"),
@@ -731,7 +625,6 @@ def build_kroos_json(df: pd.DataFrame) -> dict:
             "carries_final_third_per90": f("carries_final_third_per90"),
             "sca_per90":                 f("sca_per90"),
             "fouls_committed_per90":     f("fouls_committed_per90"),
-            # Understat
             "xa_per90":                 f("xa_per90"),
             "np_xg_per90":              f("np_xg_per90"),
             "xg_chain":                 f("xg_chain"),
@@ -746,11 +639,6 @@ def build_kroos_json(df: pd.DataFrame) -> dict:
 
 
 def print_cluster_profiles(df: pd.DataFrame) -> None:
-    """
-    Print a per-cluster summary to help assign archetype names in
-    dataTransforms.js after running the pipeline.
-    """
-    # Normalize to internal column names (process_data names, before CSV rename)
     df = df.copy()
     rename_back = {
         "tackles":       "tackles_won",
