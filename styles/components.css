@@ -485,6 +485,12 @@
   line-height: 1.6;
 }
 
+.tooltip-divider {
+  border: none;
+  border-top: 1px solid var(--border-default);
+  margin: 4px 0;
+}
+
 .tooltip-val {
   font-family: var(--font-mono);
   font-size: 0.7rem;

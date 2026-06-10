@@ -153,6 +153,12 @@ const ParallelCoordsChart = (() => {
               <div class="tooltip-row"><span>League</span><span class="tooltip-val">${d.league}</span></div>
               <div class="tooltip-row"><span>Season</span><span class="tooltip-val">${d.season}</span></div>
               <div class="tooltip-row"><span>Role</span><span class="tooltip-val">${DataTransforms.CLUSTER_NAMES[d.cluster] || "—"}</span></div>
+              <div class="tooltip-divider"></div>
+              ${activeAxes.map(ax => `
+              <div class="tooltip-row">
+                <span>${ax.label}</span>
+                <span class="tooltip-val">${(+d[ax.key] || 0).toFixed(ax.key === "pass_completion_pct" || ax.key === "long_pass_pct" ? 1 : 2)}</span>
+              </div>`).join("")}
             `);
         })
         .on("mousemove", event => {
@@ -183,6 +189,12 @@ const ParallelCoordsChart = (() => {
               <div class="tooltip-name">${selectedPlayer.name}</div>
               <div class="tooltip-row"><span>League</span><span class="tooltip-val">${selectedPlayer.league}</span></div>
               <div class="tooltip-row"><span>Season</span><span class="tooltip-val">${selectedPlayer.season}</span></div>
+              <div class="tooltip-divider"></div>
+              ${activeAxes.map(ax => `
+              <div class="tooltip-row">
+                <span>${ax.label}</span>
+                <span class="tooltip-val">${(+selectedPlayer[ax.key] || 0).toFixed(ax.key === "pass_completion_pct" || ax.key === "long_pass_pct" ? 1 : 2)}</span>
+              </div>`).join("")}
             `);
         })
         .on("mousemove", event => {
@@ -206,6 +218,12 @@ const ParallelCoordsChart = (() => {
             .html(`
               <div class="tooltip-name">Toni Kroos</div>
               <div class="tooltip-row"><span>Season</span><span class="tooltip-val">${kroosPlayer.season}</span></div>
+              <div class="tooltip-divider"></div>
+              ${activeAxes.map(ax => `
+              <div class="tooltip-row">
+                <span>${ax.label}</span>
+                <span class="tooltip-val">${(+kroosPlayer[ax.key] || 0).toFixed(ax.key === "pass_completion_pct" || ax.key === "long_pass_pct" ? 1 : 2)}</span>
+              </div>`).join("")}
             `);
         })
         .on("mousemove", event => {
