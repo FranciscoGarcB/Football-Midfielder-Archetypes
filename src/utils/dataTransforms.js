@@ -31,17 +31,17 @@ const DataTransforms = (() => {
   // are added and clusters shift.
   const CLUSTER_NAMES  = {
     0: "Defensive Midfielder",
-    1: "Attacker",
-    2: "Ball-winning passer",
-    3: "Playmaker",
-    4: "Wide Player",
+    1: "Playmaker",
+    2: "Wide Player",
+    3: "Attacker",
+    4: "Ball-winning passer",
   };
   const CLUSTER_COLORS = {
     0: "#f87171",
     1: "#4ade80",
-    2: "#f0c060",
+    2: "#c084fc",
     3: "#60a5fa",
-    4: "#c084fc",
+    4: "#f0c060",
   };
 
   function applyFilters(data, filters) {
