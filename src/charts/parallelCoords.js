@@ -175,7 +175,7 @@ const ParallelCoordsChart = (() => {
 
     // Layer 2: selected successor
     if (selectedPlayer) {
-      const selColor = DataTransforms.CLUSTER_COLORS[selectedPlayer.cluster] || "#60a5fa";
+      const selColor = DataTransforms.CLUSTER_COLORS[selectedPlayer.cluster] || "#5c5750";
       g.append("path")
         .datum(selectedPlayer)
         .attr("d",            line(selectedPlayer))

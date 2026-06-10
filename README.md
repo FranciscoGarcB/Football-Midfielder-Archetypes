@@ -101,9 +101,15 @@ Downloads FBref and Understat stats and writes four CSVs to `data/raw/`. Prints 
 
 Season codes use soccerdata's format: `1920` = 2019-20, `2526` = 2025-26. `scrape.py` converts these to the `"YYYY-YY"` string format used throughout the project.
 
-### Step 2 — Place season CSVs
+### Step 2 — Create season CSVs
 
-Place manually-exported FBref passing CSVs in `data/raw/player_data/` named `cleaned_YYYY-YY.csv`. These files must contain at minimum:
+Place manually-exported FBref passing CSV from [Kaggle](https://www.kaggle.com/datasets/emrey3lmaz/top-5-league-football-player-stats-2017-2025?resource=download) in `data/raw/player_data/` named `Top5_League_Players_2017to2024_dataset`. Next run:
+```bash
+python data/data_cleaning.py
+```
+This will create separate files for each season called `cleaned_YYYY-YY.csv`.
+
+Alternatively place manually-exported FBref passing CSVs in data/raw/player_data/ named `cleaned_YYYY-YY.csv`.These files must contain at minimum:
 
 ```
 player, comp, season, squad,
