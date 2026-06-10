@@ -31,10 +31,10 @@ const DataTransforms = (() => {
   // are added and clusters shift.
   const CLUSTER_NAMES  = {
     0: "Defensive Midfielder",
-    1: "Playmaker",
-    2: "Wide Player",
-    3: "Attacker",
-    4: "Ball-winning passer",
+    1: "Attacker",
+    2: "Ball-winning passer",
+    3: "Wide Player",
+    4: "Playmaker",
   };
   const CLUSTER_COLORS = {
     0: "#f87171",
