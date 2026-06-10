@@ -85,6 +85,7 @@ TROPHY_TIMELINE = [
     {"season": "2022-23", "laliga": False, "copa": True,  "ucl": False},
     {"season": "2023-24", "laliga": False, "copa": False, "ucl": True},
     {"season": "2024-25", "laliga": False, "copa": False, "ucl": False},
+    {"season": "2025-25", "laliga": False, "copa": False, "ucl": False}
 ]
 
 FBREF_MERGE_KEYS      = ["player", "team", "league", "season"]
