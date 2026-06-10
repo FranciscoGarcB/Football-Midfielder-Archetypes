@@ -409,6 +409,179 @@
 
   </section>
 
+  <section class="viz-section viz-section--alt" id="s06">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <div>
+        <h2 class="section-title">Core Insights & Findings</h2>
+        <p class="section-desc">
+          This is an overview of the findings drawn from the PCA dimensionality reduction and k-means clustering model.
+        </p>
+      </div>
+    </div>
+
+    <div class="chart-card chart-card--full" id="chart-06-findings">
+      <div class="chart-card__body" style="padding: var(--spacing-lg, 2rem); line-height: 1.6;">
+
+        <div class="finding-group" style="margin-bottom: 2rem;">
+          <div class="findings-container" style="line-height: 1.6; font-family: var(--font-ui, sans-serif);">
+
+            <!-- Integrated Q1 Analysis Header -->
+            <div style="margin-bottom: 2rem;">
+              <h3 style="font-family: var(--font-display); color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.25rem;">
+                <strong>Q1 Analysis:</strong> How do the top midfielder archetypes differ across the five major European leagues?
+              </h3>
+              <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                By combining statistical averages of the top 10% of midfielders with their multi-dimensional spatial positioning on the 2D PCA scatter plot (where PC1 represents attacking dynamism/box-crashing intensity at 38.1% variance, and PC2 captures possession orchestration/passing volume at 15.2% variance), tactical league profiles emerge:
+              </p>
+            </div>
+
+            <!-- Combined League Cards List -->
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+
+              <!-- Premier League -->
+              <div style="border-left: 4px solid #3b82f6; padding-left: 1.25rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 600;">
+                  Premier League
+                </h4>
+                <p style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  <strong>Statistical Profile:</strong> Elite midfielders here dominate both progression and final-third threat in a fast-paced environment. They lead Europe in <strong>Progressive Passes</strong> (~5.00/90), <strong>Key Passes</strong> (1.34/90), and <strong>Goals</strong> (0.17/90), while sharing the top spot for <strong>xA/90</strong> (0.13). Their high physical output is underscored by ranking second overall in <strong>Tackles</strong> (1.13/90).
+                </p>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem; font-style: italic;">
+                  <strong>PCA Space Mapping:</strong> Displays a massive, highly uniform cloud across the center-right, featuring a heavy concentration of players extending deep into the far-right attacking quadrant (PC1 > 5). This horizontal elongation visually confirms the league's high demand for transition-heavy, final-third threat creators.
+                </p>
+              </div>
+
+              <!-- La Liga -->
+              <div style="border-left: 4px solid #ef4444; padding-left: 1.25rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 600;">
+                  La Liga
+                </h4>
+                <p style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  <strong>Statistical Profile:</strong> Midfielders in this league represent a balanced, highly technical middle ground without extreme data skews. They sit comfortably in the middle tier for nearly every category, maintaining a stable baseline of clean possession recycling, reliable <strong>Progressive Passing</strong> (4.58/90), and steady chance creation (1.23 <strong>Key Passes</strong>/90).
+                </p>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem; font-style: italic;">
+                  <strong>PCA Space Mapping:</strong> The distribution is tightly compressed around the left and center-left, showing a tactical aversion to final-third risk. Crucially, it features an exclusive tier of highlighted standout nodes at the absolute vertical apex of the plot (PC2 climbing toward 6). These outliers represent Toni Kroos's prime seasons, visually proving that his volume and style of deep-lying possession progression isolated him completely from the standard modern midfielder profile.
+                </p>
+              </div>
+
+              <!-- Serie A -->
+              <div style="border-left: 4px solid #06b6d4; padding-left: 1.25rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 600;">
+                  Serie A
+                </h4>
+                <p style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  <strong>Statistical Profile:</strong> This league prioritizes structural control, patience, and ball retention over box-crashing metrics. They lead the top 5 leagues significantly in <strong>Long Pass Accuracy</strong> (59.23%). Because they operate predominantly in safer, deeper areas, they rank lowest for <strong>xA</strong> (0.09), <strong>Goal Creating Actions</strong> (0.27), and defensive <strong>Tackles</strong> (0.95/90).
+                </p>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem; font-style: italic;">
+                  <strong>PCA Space Mapping:</strong> The data points form a dense cluster strictly on the left half of the graph, heavily populating the deep-lying distributor (purple) and defensive ball-winner (red/blue) clusters. The far-right side of the plot is remarkably barren, with almost no players breaking past a PC1 score of 5, providing clear visual evidence of structurally conservative, deeply positioned midfield blocks.
+                </p>
+              </div>
+
+              <!-- Bundesliga -->
+              <div style="border-left: 4px solid #eab308; padding-left: 1.25rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 600;">
+                  Bundesliga
+                </h4>
+                <p style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  <strong>Statistical Profile:</strong> Reflecting a heavy transitional playing style, elite midfielders in this league register the lowest <strong>Progressive Passing volume</strong> (4.33/90) but maximize efficiency by leading Europe in <strong>Goal Creating Actions</strong> (0.33/90). They rely heavily on winning possession high up the pitch, tying for the most <strong>Interceptions</strong> (1.06/90).
+                </p>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem; font-style: italic;">
+                  <strong>PCA Space Mapping:</strong> The graph shows a notable rightward migration along the horizontal axis, specifically populating the green cluster at the bottom right. The lack of players near the top vertical axis indicates fewer high-volume possession circulators, while the strong presence in the lower-right quadrant reflects dynamic engines designed to intercept and strike into open space.
+                </p>
+              </div>
+
+              <!-- Ligue 1 -->
+              <div style="border-left: 4px solid #a855f7; padding-left: 1.25rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: var(--text-primary); font-size: 1.1rem; font-weight: 600;">
+                  Ligue 1
+                </h4>
+                <p style="margin: 0 0 0.5rem 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  <strong>Statistical Profile:</strong> Characterized by athletic box-to-box profiles, these midfielders focus on breaking up play and arriving late to finish chances rather than orchestrating them. They pace all leagues in <strong>Tackles</strong> (1.15/90) and tie for first in <strong>Interceptions</strong> (1.06/90). In possession, they hold the highest <strong>npxG</strong> (0.11/90) but rank last in <strong>Key Passes</strong> (1.13/90).
+                </p>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem; font-style: italic;">
+                  <strong>PCA Space Mapping:</strong> Features a heavy anchoring footprint in the defensive destroyer zones on the left, but is uniquely punctuated by a stark, detached "island" of extreme outliers on the far right (PC1 stretching between 8 and 11). This separation captures the league's split profile: a highly physical defensive baseline contrasted against an elite tier of hyper-dynamic attacking box crashers.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--chart-grid-color, #333); margin: 2rem 0;" />
+
+        <!-- Q2 Analysis: Finding the Kroos Successor -->
+        <div class="successor-findings-container" style="line-height: 1.6; font-family: var(--font-ui, sans-serif); margin-top: 3rem;">
+
+          <div style="margin-bottom: 2rem;">
+            <h3 style="font-family: var(--font-display); color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1.25rem;">
+              <strong>Q2 Analysis:</strong> Which active players share a statistical profile closest to Toni Kroos?
+            </h3>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem;">
+              To address the void left in the club, potential successors under the age of 25 were analyzed, revealing distinct market realities and tactical constraints:
+            </p>
+          </div>
+
+          <!-- Main Grid layout for options -->
+          <div style="display: flex; flex-direction: column; gap: 2rem;">
+
+            <!-- Top 3 External Candidates Under 25 -->
+            <div>
+              <h4 style="margin: 0 0 1rem 0; color: var(--text-primary); font-size: 1.1rem; border-bottom: 1px solid var(--chart-grid-color, #333); padding-bottom: 0.5rem;">
+                The Top Three Under-25 Candidates (2024/25 Data)
+              </h4>
+              <div style="display: flex; flex-direction: column; gap: 1.25rem; padding-left: 0.5rem;">
+                <div>
+                  <strong>João Neves (89% Similarity):</strong>
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Stands out as the statistically closest profile to the German playmaker across Europe. However, an analytical constraint exists: our dataset is strictly bounded to his single 2024/25 campaign in a Top 5 League, making it difficult to assess the long-term stylistic stability.
+                  </span>
+                </div>
+                <div>
+                  <strong>Pedri (86% Similarity):</strong>
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Next in line to replace Kroos according to the prediction according to his performacne in the season 2024/25. Despite the data match, his status as a core Barcelona player presents a massive real-world barrier that makes a transfer highly unlikely.
+                  </span>
+                </div>
+                <div>
+                  <strong>Angelo Stiller (86% Similarity):</strong>
+                  <span style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Represents the most viable and realistic technical solution on the market. His perfomances make him a good fit and also a real-life transfer market rumor makes him a reasonable chocie.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- The Vet & Internal Options Split Grid -->
+            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
+
+              <!-- Joshua Kimmich -->
+              <div style="flex: 1; min-width: 280px; background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 6px; border: 1px solid var(--chart-grid-color, #222);">
+                <h5 style="margin: 0 0 0.75rem 0; color: var(--text-primary); font-size: 1rem;">
+                  The Veteran Alternative: Joshua Kimmich
+                </h5>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  While having a slightly lower similarity (88%), visual plotting across multiple historical seasons reveals that he consistently finds himself in the exact same spatial cluster as Toni Kroos. He plays for an elite club and has extensive Champions League experience. However, at 31 years old, he represents a short-term patch rather than a definitive long-term solution.
+                </p>
+              </div>
+
+              <!-- Internal In-Squad Analysis -->
+              <div style="flex: 1; min-width: 280px; background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 6px; border: 1px solid var(--chart-grid-color, #222);">
+                <h5 style="margin: 0 0 0.75rem 0; color: var(--text-primary); font-size: 1rem;">
+                  Internal Squad Evaluation
+                </h5>
+                <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  Comparing options within the current roster emphasizes why tactical adjustments have been difficult. <strong>Luka Modrić</strong> rates out as the most natural mathematical profile match, but at 41 years old, he can not be the solution. Conversely, younger players like <strong>Federico Valverde</strong> and <strong>Jude Bellingham</strong> display significantly lower similarity scores because they are fundamentally different player types.
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
 
   <footer class="site-footer" id="conclusions">
     <div class="footer-inner">
