@@ -327,4 +327,5 @@ d3 v7   https://cdn.jsdelivr.net/npm/d3@7
 
 - Player statistics: [FBref](https://fbref.com) via [soccerdata](https://github.com/probberechts/soccerdata) (original data from StatsBomb)
 - Expected stats (xG, xA): [Understat](https://understat.com) via soccerdata
+- [Kaggle dataset](https://www.kaggle.com/datasets/emrey3lmaz/top-5-league-football-player-stats-2017-2025?resource=download) 
 - Trophy results: compiled manually from public records
